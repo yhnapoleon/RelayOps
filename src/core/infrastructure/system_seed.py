@@ -478,6 +478,7 @@ def seed_demo_walkthrough_resources() -> None:
             session.add(job)
             session.flush()
 
+        job.has_mmp_dependency = True
         job.mmp_project_id = "inventory-risk-demo"
         job.mmp_model_id = "agg-v2"
         job.control_m_cron = "0 */2 * * *"

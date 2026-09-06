@@ -12,7 +12,6 @@ Three reported write-mode defects this guards against:
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
 import core.models.entities  # noqa: F401 — register tables
 from core.auth.jwt import CurrentUser
@@ -31,9 +30,9 @@ def _actor(role=UserRole.RELAYOPS_MEMBER, uid=42, username="dora"):
 
 
 @pytest.fixture
-def factory():
+def factory(tmp_path):
     engine = create_engine(
-        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
+        f"sqlite:///{tmp_path / 'batch.sqlite'}", connect_args={"check_same_thread": False}
     )
     Base.metadata.create_all(engine)
     f = sessionmaker(bind=engine)
@@ -44,7 +43,10 @@ def factory():
                     assignee_id=42, created_at=NOW))
     s.commit()
     s.close()
-    return f
+    # Parallel tool calls need independent connections, as in the real database.
+    # A shared StaticPool connection is unsafe for concurrent SQLite cursors.
+    yield f
+    engine.dispose()
 
 
 # ── Fix #3: read tools are bound in write mode ───────────────────────────
