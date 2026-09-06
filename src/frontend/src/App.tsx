@@ -5605,6 +5605,7 @@ export default function App() {
               <div className="text-[10px] text-slate-300 capitalize">{userRole.replace('_', ' ')}</div>
             </div>
           </div>
+          <AccountPasswordDialog />
           <Button variant="ghost" className="w-full justify-start text-slate-500 hover:text-relayops-brand hover:bg-relayops-brand/5" onClick={handleLogout}>
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out
@@ -16243,21 +16244,20 @@ function MembersDialog({
           <DialogTitle>Project Members</DialogTitle>
           <DialogDescription>
             {canManageMembers
-              ? <>Add members by username for <strong>{project.name}</strong>. If the username hasn't logged in yet, the access applies automatically on first login.</>
+              ? <>Add members by username for <strong>{project.name}</strong>. For a new username, an administrator must set a password before the user can sign in.</>
               : <>Members of <strong>{project.name}</strong>. You can switch your own role between Ops Member and Product Member; only the Business Owner can add or remove members.</>}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
           {/* Add member by username — owner/admin only. Backend pre-provisions
-              a stub user row when the username hasn't logged in before, so the
-              membership is granted immediately and resolves on the user's
-              next login. */}
+              a pending account if needed. An admin must set its password
+              before it can sign in. */}
           {canManageMembers && (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="text-sm font-semibold text-slate-900">Add Member by Username</div>
             <div className="mt-1 text-xs text-slate-500">
-              Enter the user's username. Works even if they haven't logged in yet — the membership binds to the username and resolves on their next login. The project's Business Owner is held by the creator and isn't assigned here.
+              Enter the user's username. New usernames receive a pending account; ask an administrator to set its password before signing in. The project's Business Owner is held by the creator and isn't assigned here.
             </div>
             <div className="mt-3 space-y-2">
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -16308,8 +16308,8 @@ function MembersDialog({
               <div className="mt-1 text-xs text-slate-500">
                 Hand the Business Owner role to another username. The current owner
                 {currentOwner ? <> (<strong>{currentOwner.display_name || currentOwner.username}</strong>)</> : null}
-                {' '}is demoted to Ops Member. Works for usernames that haven't logged in yet —
-                the new owner picks it up on their next login.
+                {' '}is demoted to Ops Member. For a new username,
+                an administrator must set a password before the new owner can sign in.
               </div>
               <div className="mt-3 space-y-2">
                 <Input
@@ -16401,7 +16401,7 @@ function MembersDialog({
                             </Badge>
                           )}
                           {!member.display_name && (
-                            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">Pending first login</Badge>
+                            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">Profile incomplete</Badge>
                           )}
                         </div>
                         <div className="text-[11px] text-slate-400">{member.username}</div>
@@ -18815,9 +18815,40 @@ function ScheduleCalendar({
 // touches ProjectMember rows.
 //
 // Every change auto-pins the role (role_locked=True on the backend)
-// so it survives the LDAP sync that runs on every login. Platform
-// owners (config.yaml) appear here read-only because their admin role
-// is asserted at startup regardless of the locked flag.
+// as a persistent account setting. Platform
+// owners (config.yaml) are protected from role demotion.
+
+function AccountPasswordDialog() {
+  const [open, setOpen] = useState(false);
+  const [current, setCurrent] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [saving, setSaving] = useState(false);
+  return <Dialog open={open} onOpenChange={(value) => {
+    if (saving) return;
+    setOpen(value); setCurrent(''); setPassword(''); setConfirm('');
+  }}>
+    <DialogTrigger asChild><Button variant="ghost" className="w-full justify-start text-slate-500">Change password</Button></DialogTrigger>
+    <DialogContent>
+      <DialogHeader><DialogTitle>Change password</DialogTitle><DialogDescription>Choose at least 12 characters. You will need to sign in again on all devices.</DialogDescription></DialogHeader>
+      <form className="space-y-4" onSubmit={async (event) => {
+        event.preventDefault();
+        if (password !== confirm) { toast.error('Passwords do not match'); return; }
+        setSaving(true);
+        try {
+          await api.changePassword(current, password);
+          window.location.reload();
+        } catch (err: any) { toast.error(err?.detail || 'Failed to change password'); }
+        finally { setSaving(false); }
+      }}>
+        <label className="block space-y-1">Current password<Input type="password" autoComplete="current-password" required maxLength={1024} value={current} onChange={e => setCurrent(e.target.value)} /></label>
+        <label className="block space-y-1">New password<Input type="password" autoComplete="new-password" required minLength={12} maxLength={1024} value={password} onChange={e => setPassword(e.target.value)} /></label>
+        <label className="block space-y-1">Confirm new password<Input type="password" autoComplete="new-password" required minLength={12} maxLength={1024} value={confirm} onChange={e => setConfirm(e.target.value)} /></label>
+        <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Change password'}</Button>
+      </form>
+    </DialogContent>
+  </Dialog>;
+}
 
 function AdminUsersView({
   authUser,
@@ -18834,6 +18865,13 @@ function AdminUsersView({
   // any one of them.
   const [draftRoles, setDraftRoles] = useState<Record<number, api.GlobalUserRole>>({});
   const [savingUserId, setSavingUserId] = useState<number | null>(null);
+  const [accountDialog, setAccountDialog] = useState<'create' | api.AdminUserData | null>(null);
+  const [accountSaving, setAccountSaving] = useState(false);
+  const [accountForm, setAccountForm] = useState({ username: '', display_name: '', password: '', confirm: '', role: 'regular_user' as api.GlobalUserRole });
+  const openAccountDialog = (target: 'create' | api.AdminUserData) => {
+    setAccountForm({ username: '', display_name: '', password: '', confirm: '', role: 'regular_user' });
+    setAccountDialog(target);
+  };
 
   const load = useCallback(async (term: string) => {
     setLoading(true);
@@ -18878,7 +18916,7 @@ function AdminUsersView({
     // access to this very page on success.
     const isSelf = user.id === authUser.user_id;
     const willLogoutSelf = isSelf && target !== 'admin';
-    const baseMsg = `Change ${user.display_name || user.username}'s global role from "${roleLabel(user.role)}" to "${roleLabel(target)}"?\n\nThe new role will be pinned (LDAP sync won't overwrite it).`;
+    const baseMsg = `Change ${user.display_name || user.username}'s global role from "${roleLabel(user.role)}" to "${roleLabel(target)}"?\n\nThe new role takes effect on the next request.`;
     const fullMsg = willLogoutSelf
       ? `${baseMsg}\n\nWARNING: this is your own account. You will lose admin access immediately and be logged out.`
       : baseMsg;
@@ -18911,12 +18949,13 @@ function AdminUsersView({
         <div>
           <h3 className="text-2xl font-bold text-slate-900">User Management</h3>
           <p className="text-sm text-slate-500">
-            Change a user's global login role (admin / Ops Member / Regular User). The new role is pinned so the next LDAP sync won't undo it. Per-project roles live in each project's Members dialog.
+            Create local accounts, set passwords, and manage global roles. Per-project roles live in each project's Members dialog.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="capitalize">{users.length} users</Badge>
           <Badge variant="outline" className={roleBadgeTone('admin')}>{adminCount} admins</Badge>
+          <Button onClick={() => openAccountDialog('create')}>Create account</Button>
         </div>
       </div>
 
@@ -19024,6 +19063,7 @@ function AdminUsersView({
                         {savingUserId === user.id ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
                         Apply
                       </Button>
+                      <Button size="sm" variant="ghost" className="ml-2" onClick={() => openAccountDialog(user)}>Set password</Button>
                     </TableCell>
                   </TableRow>
                 );
@@ -19037,6 +19077,51 @@ function AdminUsersView({
         Demoting a user with active projects does not remove them from those projects — they keep their per-project membership and can still be a Business Owner on individual projects.
         Their global tab visibility (Admin Panel, Verification, etc.) changes on their next page load.
       </p>
+      <Dialog open={accountDialog !== null} onOpenChange={(open) => {
+        if (!open && !accountSaving) {
+          setAccountDialog(null);
+          setAccountForm(prev => ({ ...prev, password: '', confirm: '' }));
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{accountDialog === 'create' ? 'Create account' : `Set password for ${accountDialog?.username || ''}`}</DialogTitle>
+            <DialogDescription>Use at least 12 characters. Setting a password signs the account out of all existing sessions.</DialogDescription>
+          </DialogHeader>
+          <form className="space-y-4" onSubmit={async (event) => {
+            event.preventDefault();
+            if (!accountDialog) return;
+            if (accountForm.password !== accountForm.confirm) { toast.error('Passwords do not match'); return; }
+            setAccountSaving(true);
+            try {
+              if (accountDialog === 'create') {
+                const { confirm: _confirm, ...data } = accountForm;
+                await api.createLocalUser(data);
+                toast.success('Account created');
+              } else {
+                await api.resetUserPassword(accountDialog.id, accountForm.password);
+                toast.success('Password updated');
+                if (accountDialog.id === authUser.user_id) { api.clearToken(); window.location.reload(); return; }
+              }
+              setAccountDialog(null);
+              setAccountForm(prev => ({ ...prev, password: '', confirm: '' }));
+              await load(search.trim());
+            } catch (err: any) { toast.error(err?.detail || 'Failed to save account'); }
+            finally { setAccountSaving(false); }
+          }}>
+            {accountDialog === 'create' && <>
+              <label className="block space-y-1">Username<Input required pattern="[A-Za-z0-9_.-]+" maxLength={255} autoComplete="off" value={accountForm.username} onChange={e => setAccountForm(prev => ({ ...prev, username: e.target.value }))} /></label>
+              <label className="block space-y-1">Display name<Input maxLength={255} value={accountForm.display_name} onChange={e => setAccountForm(prev => ({ ...prev, display_name: e.target.value }))} /></label>
+              <label className="block space-y-1">Global role<select className="w-full rounded-md border p-2" value={accountForm.role} onChange={e => setAccountForm(prev => ({ ...prev, role: e.target.value as api.GlobalUserRole }))}>
+                <option value="regular_user">Regular User</option><option value="relayops_member">Ops Member</option><option value="admin">Admin</option>
+              </select></label>
+            </>}
+            <label className="block space-y-1">Password<Input type="password" autoComplete="new-password" required minLength={12} maxLength={1024} value={accountForm.password} onChange={e => setAccountForm(prev => ({ ...prev, password: e.target.value }))} /></label>
+            <label className="block space-y-1">Confirm password<Input type="password" autoComplete="new-password" required minLength={12} maxLength={1024} value={accountForm.confirm} onChange={e => setAccountForm(prev => ({ ...prev, confirm: e.target.value }))} /></label>
+            <Button type="submit" disabled={accountSaving}>{accountSaving ? 'Saving…' : 'Save account'}</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

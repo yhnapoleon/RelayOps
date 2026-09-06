@@ -71,7 +71,7 @@ def _build_accessible_issue_query(session, current_user: CurrentUser, is_admin: 
     group_ids = [
         project.id
         for project in session.query(Project).all()
-        if user_has_project_group_access(session, project, current_user.ad_groups)
+        if user_has_project_group_access(session, project, current_user.groups)
     ]
     my_project_ids = list(set(owned_ids + member_ids + group_ids))
     my_product_ids = (
@@ -396,7 +396,7 @@ def list_audit_logs(
         group_ids = [
             project.id
             for project in session.query(Project).all()
-            if user_has_project_group_access(session, project, current_user.ad_groups)
+            if user_has_project_group_access(session, project, current_user.groups)
         ]
         my_project_ids = list(set(owned_ids + member_ids + group_ids))
         my_product_ids = (

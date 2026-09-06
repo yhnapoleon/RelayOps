@@ -155,7 +155,7 @@ def test_new_tools_are_all_t1_no_high_risk():
     assert {"draft_edit_project_tool", "draft_edit_product_tool",
             "draft_set_member_role_tool"} <= names
     forbidden = ("owner", "transfer", "delete", "approve", "reject", "create",
-                 "ldap", "global")
+                 "local_account", "global")
     assert not any(any(f in n for f in forbidden) for n in names)
 
 

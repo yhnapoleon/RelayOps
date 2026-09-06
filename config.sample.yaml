@@ -11,10 +11,8 @@ database:
     dbname: relayops
     user: relayops
     credential: relayops-local-demo
-ldap:
-  server: ldap://localhost:1389
-  base_dn: dc=example,dc=com
-  use_ssl: false
+auth:
+  demo_accounts: true
 platform_owners: [admin]
 server:
   reload: false

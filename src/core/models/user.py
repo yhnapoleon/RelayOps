@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String
 
 from core.models.database import Base
 
@@ -54,7 +54,7 @@ def is_elevated_role(value: Optional[str]) -> bool:
     = ``admin`` or ``relayops_member``. Per the platform decision, relayops_member is a
     small, trusted, high-privilege population and should hold full reach
     EXCEPT platform-admin-only powers, which are gated separately and NOT
-    covered here: admin panel, audit-log full view, LDAP, global templates,
+    covered here: admin panel, audit-log full view, account management, global templates,
     issue reassignment, handover/version approval, and owner transfer.
 
     This is a pure role check (no ``platform_owners`` config dependency) so
@@ -68,18 +68,18 @@ class User(Base):
     """
     User account model.
 
-    Stores user credentials and display information from LDAP.
+    Stores a salted password hash, session version, and local profile.
 
     Attributes:
         id: Primary key.
         username: Unique username (normalized to lowercase).
-        display_name: Display name from LDAP.
+        display_name: Display name from local account.
         role: Global user role (admin / regular_user / relayops_member). NOT
             the per-project role — that lives on ProjectMember.role.
-        role_locked: When True, the global role was set manually and must
-            NOT be overwritten by the LDAP role resolver on login. (Note:
-            the Members dialog no longer touches this flag — kept for
-            legacy rows that were locked under the old behaviour.)
+        role_locked: Records that an administrator assigned the global role.
+        password_hash: Salted password hash; unset accounts cannot sign in.
+        token_version: Incremented to revoke all sessions.
+        group_keys: Locally assigned support-group memberships.
         created_at: Account creation timestamp.
     """
 
@@ -88,9 +88,11 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String(255), unique=True, nullable=False)
     display_name = Column(String(255), nullable=True)
-    # Email captured from the LDAP ``mail`` attribute at login. Kept as a
-    # display-name form, then the username form (see
-    # ``resolve_user_email_candidates``). May be NULL.
+    password_hash = Column(String(255), nullable=True)
+    token_version = Column(Integer, nullable=False, default=0)
+    group_keys = Column(JSON, nullable=True, default=list)
+    # Optional stored notification address. See resolve_user_email_candidates
+    # for configured fallback addresses when it is unset.
     email = Column(String(320), nullable=True)
     role = Column(String(50), nullable=False, default=UserRole.REGULAR_USER)
     role_locked = Column(Boolean, nullable=False, default=False)

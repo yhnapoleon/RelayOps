@@ -254,7 +254,7 @@ def list_projects(current_user: CurrentUser = Depends(get_current_user)):
         db,
         user_id=current_user.user_id,
         is_admin=is_admin,
-        ad_groups=current_user.ad_groups,
+        groups=current_user.groups,
     )
     owner_cache: dict = {}
     return [_enrich_project(p, owner_cache) for p in projects]
@@ -272,7 +272,7 @@ def get_project(
         project_id=project_id,
         user_id=current_user.user_id,
         is_admin=is_admin,
-        ad_groups=current_user.ad_groups,
+        groups=current_user.groups,
     )
     if result.status == "not_found":
         raise NotFoundError("Project not found")
@@ -367,7 +367,7 @@ def copy_project(
         source_project_id=project_id,
         actor_user_id=current_user.user_id,
         is_admin=is_elevated_role(current_user.role),
-        ad_groups=current_user.ad_groups,
+        groups=current_user.groups,
     )
     if response.status == "not_found":
         raise NotFoundError("Project not found")
@@ -403,7 +403,7 @@ def resolve_project_binding(
         project_id=project_id,
         user_id=current_user.user_id,
         is_admin=is_admin,
-        ad_groups=current_user.ad_groups,
+        groups=current_user.groups,
     )
     if fetch.status == "not_found":
         raise NotFoundError("Project not found")
@@ -447,7 +447,7 @@ def _fetch_cml_items(
         project_id=project_id,
         user_id=current_user.user_id,
         is_admin=is_admin,
-        ad_groups=current_user.ad_groups,
+        groups=current_user.groups,
     )
     if fetch.status == "not_found":
         raise NotFoundError("Project not found")
@@ -521,7 +521,7 @@ def _require_project_view(project_id: int, current_user: CurrentUser) -> Project
         project_id=project_id,
         user_id=current_user.user_id,
         is_admin=is_elevated_role(current_user.role),
-        ad_groups=current_user.ad_groups,
+        groups=current_user.groups,
     )
     if fetch.status == "not_found":
         raise NotFoundError("Project not found")
@@ -575,7 +575,7 @@ def submit_project_version_endpoint(
         actor_user_id=current_user.user_id,
         actor_username=current_user.username,
         actor_role=current_user.role,
-        actor_ad_groups=current_user.ad_groups,
+        actor_groups=current_user.groups,
         change_summary=body.change_summary,
         requested_version_number=body.requested_version_number,
     )
@@ -593,7 +593,7 @@ def initiate_project_handover(
         actor_user_id=current_user.user_id,
         actor_username=current_user.username,
         actor_role=current_user.role,
-        actor_ad_groups=current_user.ad_groups,
+        actor_groups=current_user.groups,
     )
     return IssueResponse.model_validate(issue)
 
@@ -648,7 +648,7 @@ def rollback_project_version_endpoint(
         actor_user_id=current_user.user_id,
         actor_username=current_user.username,
         actor_role=current_user.role,
-        actor_ad_groups=current_user.ad_groups,
+        actor_groups=current_user.groups,
     )
     return ProjectVersionResponse.model_validate(draft)
 

@@ -15,12 +15,6 @@ services:
       timeout: 5s
       retries: 20
 
-  mock-ldap:
-    build:
-      context: ./docker
-      dockerfile: Dockerfile.mock-ldap
-    ports: ["127.0.0.1:1389:1389"]
-
   mock-cml:
     build:
       context: .
@@ -65,7 +59,6 @@ services:
     volumes: ["./config.sample.yaml:/app/config.yaml:ro"]
     environment:
       RELAYOPS_DATABASE_URL: postgresql://relayops:relayops-local-demo@database:5432/relayops
-      RELAYOPS_LDAP_SERVER: ldap://mock-ldap:1389
       RELAYOPS_CML_BASE_URL: http://mock-cml:9000
       RELAYOPS_MMP_BASE_URL: http://mock-monitor:9005
       RELAYOPS_MOCK_SERVICES_URL: http://mock-cml:9000
@@ -73,11 +66,12 @@ services:
       RELAYOPS_LLM_API_KEY: ${RELAYOPS_LLM_API_KEY:-}
       RELAYOPS_LLM_MODEL: ${RELAYOPS_LLM_MODEL:-}
       RELAYOPS_JWT_SECRET: ${RELAYOPS_JWT_SECRET:-}
+      RELAYOPS_DEMO_ACCOUNTS: ${RELAYOPS_DEMO_ACCOUNTS:-true}
+      RELAYOPS_ADMIN_USERNAME: ${RELAYOPS_ADMIN_USERNAME:-admin}
+      RELAYOPS_ADMIN_PASSWORD: ${RELAYOPS_ADMIN_PASSWORD:-}
     depends_on:
       database:
         condition: service_healthy
-      mock-ldap:
-        condition: service_started
       mock-cml:
         condition: service_started
       mock-monitor:

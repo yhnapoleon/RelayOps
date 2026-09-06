@@ -5,7 +5,7 @@ flowchart LR
     UI[React workspace] --> API[FastAPI routes and role checks]
     API --> Services[Handover, product, issue and audit services]
     Services --> DB[(PostgreSQL)]
-    Directory[Local demo LDAP] --> API
+    Accounts[Local accounts and password hashes] --> API
     Controller[Monitoring controller] --> Checkers[Application, job and model checkers]
     Checkers --> Adapters[HTTP adapters]
     Adapters --> Mocks[Synthetic services]

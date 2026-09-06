@@ -120,7 +120,7 @@ def _project_access_state(
     )
     if is_member:
         return project, "member"
-    if user_has_project_group_access(session, project, current_user.ad_groups):
+    if user_has_project_group_access(session, project, current_user.groups):
         return project, "member"
     return None, "forbidden"
 
@@ -324,15 +324,15 @@ def add_member(
     # Pre-provision a stub user row when the username hasn't logged in yet,
     # so the membership can be granted ahead of their first login. Unlike
     # the pre-refactor flow, we no longer overwrite the user's global role
-    # from this endpoint — the stub starts as 'regular_user' and LDAP /
+    # from this endpoint — the stub starts as 'regular_user' and local account /
     # admin processes own that field. Membership lives entirely in the
     # ProjectMember row.
     if target_user is None:
         target_user = User(
             username=target_username,
             display_name=None,
-            # Default global role; will be updated by LDAP sync on first
-            # login if applicable. Project membership is independent.
+            # An administrator can assign a password and global role later.
+            # Project membership is independent.
             role="regular_user",
             role_locked=False,
         )
@@ -694,7 +694,7 @@ def transfer_project_owner(
     target_user = session.query(User).filter(User.username == target_username).first()
     if target_user is None:
         # Pre-provision a stub so ownership can land before the new owner's
-        # first login; LDAP / admin processes still own User.role.
+        # first login; local account / admin processes still own User.role.
         target_user = User(
             username=target_username,
             display_name=None,

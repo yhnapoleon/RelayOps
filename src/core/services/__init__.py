@@ -5,7 +5,7 @@ Module-level functions; no Service classes. Sessions are passed in by
 the route boundary (api.deps.db.get_session); these modules never call
 session.commit() unless they manage their own transactions internally.
 
-- user_service: user lookup, role resolution, LDAP sync
+- user_service: user lookup, role resolution, account initialization
 - project_service: Project CRUD with access control
 - product_service: Product CRUD + check-now + version helpers
 - app_service: Application + recovery-scenario CRUD

@@ -1,11 +1,10 @@
-"""Support-group helpers and seeded directory-preview data."""
+"""Local support-group registry and membership helpers."""
 
 from __future__ import annotations
 
 from datetime import datetime
 from typing import Any, Iterable, Optional
 
-from core.auth import ldap_auth
 from core.models.entities import (
     ProjectMember,
     ProjectRole,
@@ -44,7 +43,7 @@ SEEDED_SUPPORT_GROUPS = [
         "group_name": "Demo Shared Ops",
         "description": "Demo group used to show shared Demo support ownership across admin, testuser, and relayopsmember1.",
         "source_type": SupportGroupSourceType.SEEDED,
-        "external_ref": "cn=relayops-demo-shared-ops,ou=groups,dc=example,dc=com",
+        "external_ref": "relayops-demo-shared-ops",
     },
 ]
 
@@ -115,27 +114,18 @@ def ensure_default_support_group(session) -> SupportGroup:
     return support_group
 
 
-def preview_directory_groups(query: str) -> list[dict[str, Any]]:
-    """Preview group-like entries from the configured LDAP search provider."""
-    results = ldap_auth.search_directory_entities(query)
-    previews: list[dict[str, Any]] = []
-    for item in results or []:
-        item_type = str(item.get("type") or "").lower()
-        if item_type and item_type != "group":
-            continue
-        name = (item.get("name") or item.get("display_name") or item.get("cn") or item.get("dn") or "").strip()
-        if not name:
-            continue
-        previews.append(
-            {
-                "group_key": normalize_group_key(name),
-                "group_name": name,
-                "description": item.get("description") or "",
-                "source_type": SupportGroupSourceType.DIRECTORY,
-                "external_ref": item.get("dn") or item.get("id") or name,
-            }
-        )
-    return previews
+def preview_local_groups(query: str) -> list[dict[str, Any]]:
+    """Search the local support-group registry."""
+    from core.models.database import get_db
+    term = (query or '').strip().lower()
+    if len(term) < 2:
+        return []
+    with get_db().get_session() as session:
+        return [{'group_key': group.group_key, 'group_name': group.group_name,
+                 'description': group.description or '', 'source_type': SupportGroupSourceType.LOCAL,
+                 'external_ref': group.group_key}
+                for group in session.query(SupportGroup).filter(SupportGroup.is_active.is_(True)).all()
+                if term in f'{group.group_key} {group.group_name}'.lower()][:50]
 
 
 def import_support_groups(session, groups: list[dict[str, Any]], created_by: Optional[int]) -> list[SupportGroup]:
@@ -172,28 +162,21 @@ def import_support_groups(session, groups: list[dict[str, Any]], created_by: Opt
     return imported
 
 
-def _extract_group_cn_from_dn(value: str) -> str:
-    raw = (value or "").strip()
-    if not raw:
-        return ""
-    first_segment = raw.split(",", 1)[0].strip()
-    if "=" in first_segment:
-        _, rhs = first_segment.split("=", 1)
-        return rhs.strip()
-    return raw
+def _normalize_group_ref(value: str) -> str:
+    return (value or '').strip()
 
 
 def build_group_match_tokens(group_refs: Optional[Iterable[str]]) -> set[str]:
-    """Normalize LDAP group refs/DNs into comparable tokens and DNs."""
+    """Normalize local group keys into comparable tokens."""
     tokens: set[str] = set()
     for group_ref in group_refs or []:
         raw = str(group_ref or "").strip()
         if not raw:
             continue
         tokens.add(raw.lower())
-        normalized_cn = normalize_group_key(_extract_group_cn_from_dn(raw))
-        if normalized_cn:
-            tokens.add(normalized_cn)
+        normalized_key = normalize_group_key(_normalize_group_ref(raw))
+        if normalized_key:
+            tokens.add(normalized_key)
         normalized_raw = normalize_group_key(raw)
         if normalized_raw:
             tokens.add(normalized_raw)
@@ -201,7 +184,7 @@ def build_group_match_tokens(group_refs: Optional[Iterable[str]]) -> set[str]:
 
 
 def user_matches_support_group(session, support_group_id: Optional[int], group_refs: Optional[Iterable[str]]) -> bool:
-    """Return True when the current user's LDAP groups match a support group."""
+    """Return True when the current user's local groups match a support group."""
     if support_group_id is None:
         return False
     support_group = session.query(SupportGroup).filter(SupportGroup.id == support_group_id).first()
@@ -218,7 +201,7 @@ def user_matches_support_group(session, support_group_id: Optional[int], group_r
     external_ref = (support_group.external_ref or "").strip().lower()
     if external_ref:
         candidates.add(external_ref)
-        normalized_external_ref = normalize_group_key(_extract_group_cn_from_dn(external_ref))
+        normalized_external_ref = normalize_group_key(_normalize_group_ref(external_ref))
         if normalized_external_ref:
             candidates.add(normalized_external_ref)
     candidates.discard("")
@@ -226,7 +209,7 @@ def user_matches_support_group(session, support_group_id: Optional[int], group_r
 
 
 def user_has_project_group_access(session, project, group_refs: Optional[Iterable[str]]) -> bool:
-    """Return True when a user's LDAP groups match project-level owner/support groups."""
+    """Return True when a user's local groups match project-level owner/support groups."""
     if project is None:
         return False
     if user_matches_support_group(session, getattr(project, "owner_group_id", None), group_refs):

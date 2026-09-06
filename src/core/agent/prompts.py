@@ -68,7 +68,7 @@ values, and Chinese/English are mixed. Read by *meaning*, not by layout.
    matching scenario's escalation_target. Every contact must be sourced from the
    document. Also copy the "Project Owner" person name from MetaData **verbatim**
    into project.owner_name (e.g. "Alex Morgan" — the name only, no email, no
-   LDAP link). When a job/app owner_contact is missing, the system derives a
+   local account link). When a job/app owner_contact is missing, the system derives a
    fallback email from this owner name, so capture owner_name whenever possible.
 9. **CML binding and MMP binding are two independent signals**, not forced to
    pair: a CML-only job leaves the MMP fields blank; a job with both is a

@@ -303,9 +303,9 @@ def test_tool_pool_only_exposes_t1_tools():
     }
     # The high-risk operations stay out of the pool entirely (guide-only T2/T3):
     # owner transfer, any delete, handover/version approve·reject, new-entity
-    # creation, LDAP, global-role change.
+    # creation, account management, global-role change.
     forbidden = ("owner", "transfer", "delete", "approve", "reject", "create",
-                 "ldap", "global")
+                 "local_account", "global")
     assert not any(any(f in n for f in forbidden) for n in names)
 
 

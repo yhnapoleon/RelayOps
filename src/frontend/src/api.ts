@@ -16,7 +16,7 @@ export interface AuthUser {
   role: string;
   display_name: string | null;
   email: string | null;
-  ad_groups: string[] | null;
+  groups: string[] | null;
   /** True when the user holds the relayops_member role on at least one project
    *  (per-project role, decoupled from the global `role`). Grants operational
    *  reach (My Actions / Open Issues) over the projects they're appointed to. */
@@ -171,6 +171,11 @@ export async function logout(): Promise<void> {
 
 export async function getMe(): Promise<AuthUser> {
   return apiFetch<AuthUser>('/me');
+}
+
+export async function changePassword(current_password: string, new_password: string): Promise<void> {
+  await apiFetch('/auth/password', { method: 'POST', body: JSON.stringify({ current_password, new_password }) });
+  clearToken();
 }
 
 // ── Project API ──────────────────────────────────────────────────────
@@ -1611,11 +1616,10 @@ export interface AdminUserData {
   username: string;
   display_name: string | null;
   role: GlobalUserRole;
-  /** True when the role was set manually — LDAP sync won't overwrite. */
+  /** True when an administrator assigned the role. */
   role_locked: boolean;
   /** True when the user is pinned to admin via config.yaml's platform_owners;
-   *  UI should disable the role selector for these rows because any change
-   *  would silently revert on next login. */
+   *  UI disables demotion for these protected accounts. */
   is_platform_owner: boolean;
   /** Number of ProjectMember rows. Lets the UI surface "this user is on
    *  N projects" so an admin understands the blast radius of a demote. */
@@ -1628,6 +1632,16 @@ export async function listAdminUsers(params?: { search?: string }): Promise<Admi
   if (params?.search) query.set('search', params.search);
   const qs = query.toString();
   return apiFetch<AdminUserData[]>(`/api/admin/users${qs ? '?' + qs : ''}`);
+}
+
+export async function createLocalUser(data: {
+  username: string; password: string; display_name: string; role: GlobalUserRole;
+}): Promise<AdminUserData> {
+  return apiFetch('/api/admin/users', { method: 'POST', body: JSON.stringify(data) });
+}
+
+export async function resetUserPassword(userId: number, password: string): Promise<void> {
+  await apiFetch(`/api/admin/users/${userId}/password`, { method: 'PUT', body: JSON.stringify({ password }) });
 }
 
 export async function changeAdminUserRole(userId: number, role: GlobalUserRole): Promise<AdminUserData> {

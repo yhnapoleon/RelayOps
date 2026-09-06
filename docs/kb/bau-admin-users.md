@@ -5,8 +5,8 @@ title: Admin Panel · User Management
 
 ## purpose
 User Management (admin only) changes a user's global login role — Admin / Ops
-Member / Regular User. The new role is pinned so the next LDAP sync won't undo
-it. This is separate from per-project roles, which live in each project's
+Member / Regular User. Roles are stored on local accounts and take effect
+on the next request. This is separate from per-project roles, which live in each project's
 Members dialog.
 
 ## layout
@@ -22,6 +22,12 @@ Members dialog.
 2. Pick a new global role in that row's Change Role dropdown.
 3. Click Apply and confirm. (Changing your own account to a non-admin role logs
    you out immediately.)
+
+## accounts and passwords
+- **Create account** opens a form for username, display name, global role, and password.
+- **Set password** assigns a password to an existing account, including pending accounts created through project membership. It invalidates all existing sessions for that account.
+- Passwords must contain at least 12 characters and match their confirmation.
+- Users can change their own password from the sidebar after entering their current password.
 
 ## buttons
 - **Apply** — commits the selected global role for that user (confirmation required).

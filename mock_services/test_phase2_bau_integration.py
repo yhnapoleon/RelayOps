@@ -184,7 +184,7 @@ class TestCmlBindingResolver:
 class _StubActor:
     user_id = 99
     role = "ADMIN"
-    ad_groups: list = []
+    groups: list = []
 
 
 class TestRunJobVerification:

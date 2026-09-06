@@ -101,9 +101,8 @@ class ProjectOwnerTransferRequest(BaseModel):
     """Request body for transferring a project's Business Owner.
 
     The username is the target user's username. The backend pre-provisions
-    a stub user row when the username hasn't logged in yet (same flow as
-    ProjectMemberAdd), so the new owner can be set ahead of their first
-    login and resolves on the LDAP sync.
+    a pending user row if needed (same flow as ProjectMemberAdd). An admin
+    must set a local password before the pending account can sign in.
     """
 
     username: str = Field(..., min_length=1, max_length=255)
@@ -125,10 +124,9 @@ class UserRoleChangeRequest(BaseModel):
 class AdminUserResponse(BaseModel):
     """User row returned by the admin user-management list.
 
-    ``role_locked`` and ``is_platform_owner`` together tell the UI what
-    can actually be changed: a platform_owner row can't be edited at all
-    (admin role is pinned by config.yaml), and a non-locked role means
-    LDAP sync will reassert its value on the user's next login.
+    ``role_locked`` records an administrator's role assignment.
+    ``is_platform_owner`` protects configured owners from role demotion.
+    Password hashes are never included.
     """
 
     id: int

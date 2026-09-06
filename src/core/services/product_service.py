@@ -64,7 +64,7 @@ def _check_project_access(
     )
     if is_member:
         return project
-    if user_has_project_group_access(session, project, actor.ad_groups):
+    if user_has_project_group_access(session, project, actor.groups):
         return project
     raise ForbiddenError("Not authorized")
 

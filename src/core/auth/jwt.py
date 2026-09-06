@@ -1,223 +1,85 @@
-"""
-JWT Token utilities for authentication.
-"""
-
+"""JWT sessions backed by current local account permissions."""
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from typing import Optional
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from core.config import get_config
-from core.logging import get_logger
-
-logger = get_logger(__name__)
 
 _cfg = get_config()
 JWT_SECRET_KEY = _cfg.jwt_secret_key
-JWT_ALGORITHM = "HS256"
+JWT_ALGORITHM = 'HS256'
 JWT_EXPIRE_MINUTES = _cfg.jwt_expire_minutes
-
-# Security scheme for FastAPI
 security = HTTPBearer()
 
 
 class TokenPayload(BaseModel):
-    """JWT token payload structure."""
-
-    sub: str  # username
+    sub: str
     user_id: int
     exp: datetime
-    role: Optional[str] = None
-    display_name: Optional[str] = None
-    email: Optional[str] = None
-    ad_groups: Optional[List[str]] = None
+    token_version: int = 0
 
 
 class CurrentUser(BaseModel):
-    """Current authenticated user info."""
-
     username: str
     user_id: int
-    role: str = "regular_user"
+    role: str = 'regular_user'
     display_name: Optional[str] = None
     email: Optional[str] = None
-    ad_groups: Optional[List[str]] = None
+    groups: list[str] = Field(default_factory=list)
 
 
-def create_access_token(
-    username: str,
-    user_id: int,
-    role: str = "regular_user",
-    display_name: Optional[str] = None,
-    email: Optional[str] = None,
-    ad_groups: Optional[List[str]] = None,
-    expires_delta: Optional[timedelta] = None,
-) -> str:
-    """
-    Create a JWT access token.
-
-    Args:
-        username: The username to encode in the token
-        user_id: The user's database ID
-        role: The user's role (admin / business_owner / relayops_member)
-        display_name: The user's display name from LDAP
-        email: The user's email from LDAP
-        ad_groups: List of AD group DNs the user belongs to
-        expires_delta: Optional custom expiration time
-
-    Returns:
-        Encoded JWT token string
-    """
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=JWT_EXPIRE_MINUTES)
-
-    payload = {
-        "sub": username,
-        "user_id": user_id,
-        "role": role,
-        "exp": expire,
-        "iat": datetime.now(timezone.utc),
-    }
-
-    # Only include optional fields if they have values
+def create_access_token(username: str, user_id: int, role: str = 'regular_user',
+                        display_name: Optional[str] = None, email: Optional[str] = None,
+                        expires_delta: Optional[timedelta] = None, token_version: int = 0) -> str:
+    now = datetime.now(timezone.utc)
+    payload = {'sub': username, 'user_id': user_id, 'role': role,
+               'exp': now + (expires_delta if expires_delta is not None else timedelta(minutes=JWT_EXPIRE_MINUTES)),
+               'iat': now, 'token_version': token_version}
     if display_name:
-        payload["display_name"] = display_name
+        payload['display_name'] = display_name
     if email:
-        payload["email"] = email
-    if ad_groups:
-        payload["ad_groups"] = ad_groups
-
-    logger.debug("Created access token for user: {} role={}", username, role)
+        payload['email'] = email
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 
 def verify_token(token: str) -> Optional[TokenPayload]:
-    """
-    Verify and decode a JWT token.
-
-    Args:
-        token: The JWT token string
-
-    Returns:
-        TokenPayload if valid, None otherwise
-    """
     try:
-        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
-        # Translate legacy 'business_owner' tokens to 'regular_user' on
-        # decode — pre-rename JWTs are still valid until they expire.
-        from core.models.user import normalize_role
-        return TokenPayload(
-            sub=payload["sub"],
-            user_id=payload["user_id"],
-            exp=datetime.fromtimestamp(payload["exp"], tz=timezone.utc),
-            role=normalize_role(payload.get("role", "regular_user")),
-            display_name=payload.get("display_name"),
-            email=payload.get("email"),
-            ad_groups=payload.get("ad_groups"),
-        )
-    except jwt.ExpiredSignatureError:
-        logger.warning("Token verification failed: expired signature")
-        return None
-    except jwt.InvalidTokenError:
-        logger.warning("Token verification failed: invalid token")
+        data = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM],
+                          options={'require': ['sub', 'user_id', 'exp', 'token_version']})
+        return TokenPayload(**data)
+    except (jwt.InvalidTokenError, ValueError, TypeError):
         return None
 
 
-def _jwt_user_row_exists(user_id: int) -> bool:
-    """Verify the JWT's ``user_id`` still maps to a live ``users`` row.
-
-    The JWT secret is persistent (config/env), so tokens minted before a
-    DB rebuild remain signature-valid afterwards — but the user row they
-    point at is gone, and any write that uses ``user_id`` as a FK ends
-    up as an opaque 500. Surfacing this as 401 lets the frontend's auth
-    interceptor kick the user back to login (which re-runs
-    ``get_or_create_user`` and gets a fresh, valid id).
-    """
+def _current_account(payload: TokenPayload) -> Optional[CurrentUser]:
     from core.models.database import get_db
-    from core.models.user import User
-
-    session = get_db().get_session()
-    try:
-        return (
-            session.query(User.id).filter(User.id == user_id).first() is not None
-        )
-    finally:
-        session.close()
-
-
-async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-) -> CurrentUser:
-    """
-    FastAPI dependency to get the current authenticated user from JWT token.
-
-    Args:
-        credentials: HTTP Bearer token from Authorization header
-
-    Returns:
-        CurrentUser with username, user_id, display_name, and ad_groups
-
-    Raises:
-        HTTPException: If token is invalid, expired, or references a
-            user row that no longer exists (typically a stale token from
-            before a DB rebuild).
-    """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    token = credentials.credentials
-    payload = verify_token(token)
-
-    if payload is None:
-        raise credentials_exception
-
-    if not _jwt_user_row_exists(payload.user_id):
-        logger.warning(
-            "Rejecting stale JWT for user_id={} (username={}): users row missing",
-            payload.user_id, payload.sub,
-        )
-        raise credentials_exception
-
-    return CurrentUser(
-        username=payload.sub,
-        user_id=payload.user_id,
-        role=payload.role or "regular_user",
-        display_name=payload.display_name,
-        email=payload.email,
-        ad_groups=payload.ad_groups,
-    )
+    from core.models.user import User, UserRole, normalize_role
+    with get_db().get_session() as session:
+        user = session.query(User).filter(User.id == payload.user_id, User.username == payload.sub).first()
+        if user is None or not user.password_hash or (user.token_version or 0) != payload.token_version:
+            return None
+        role = normalize_role(user.role)
+        if role not in UserRole.ALL:
+            return None
+        return CurrentUser(username=user.username, user_id=user.id, role=role,
+                           display_name=user.display_name, email=user.email, groups=user.group_keys or [])
 
 
-def get_optional_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False)),
-) -> Optional[CurrentUser]:
-    """
-    FastAPI dependency to optionally get the current user.
-    Returns None if no valid token is provided instead of raising an exception.
-    """
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> CurrentUser:
+    payload = verify_token(credentials.credentials)
+    account = _current_account(payload) if payload else None
+    if account is None:
+        raise HTTPException(status_code=401, detail='Could not validate credentials',
+                            headers={'WWW-Authenticate': 'Bearer'})
+    return account
+
+
+def get_optional_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))) -> Optional[CurrentUser]:
     if credentials is None:
         return None
-
     payload = verify_token(credentials.credentials)
-    if payload is None:
-        return None
-
-    if not _jwt_user_row_exists(payload.user_id):
-        return None
-
-    return CurrentUser(
-        username=payload.sub,
-        user_id=payload.user_id,
-        role=payload.role or "regular_user",
-        display_name=payload.display_name,
-        email=payload.email,
-        ad_groups=payload.ad_groups,
-    )
+    return _current_account(payload) if payload else None

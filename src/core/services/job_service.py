@@ -97,7 +97,7 @@ def _check_product_access(
     )
     if is_member:
         return product
-    if user_has_project_group_access(session, project, actor.ad_groups):
+    if user_has_project_group_access(session, project, actor.groups):
         return product
     raise ForbiddenError("Not authorized")
 

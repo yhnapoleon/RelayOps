@@ -332,6 +332,6 @@ class SupportGroupSourceType:
 
     MANUAL = "manual"
     SEEDED = "seeded"
-    DIRECTORY = "directory"
+    LOCAL = "local"
 
-    ALL = [MANUAL, SEEDED, DIRECTORY]
+    ALL = [MANUAL, SEEDED, LOCAL]

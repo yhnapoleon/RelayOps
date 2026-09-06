@@ -1,6 +1,4 @@
-"""App-level configuration: APP_NAME, LDAP. Used by routers and services."""
-
-from core.auth import ldap_auth  # noqa: F401
+"""App-level display configuration used by routers and services."""
 from core.config import get_config
 
 _cfg = get_config()

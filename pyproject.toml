@@ -21,7 +21,6 @@ dependencies = [
   "gunicorn",
   "croniter",
   "httpx",
-  "ldap3",
   "loguru",
   "prometheus-client",
   "psycopg2-binary>=2.9",

@@ -210,7 +210,7 @@ def list_projects_for_user(
     *,
     user_id: int,
     is_admin: bool,
-    ad_groups: Optional[list],
+    groups: Optional[list],
 ) -> list[Project]:
     """List projects visible to a user based on role, membership, and group access."""
     session = db.get_session()
@@ -235,7 +235,7 @@ def list_projects_for_user(
         group_projects = [
             project
             for project in session.query(Project).all()
-            if project.is_system != 1 and user_has_project_group_access(session, project, ad_groups)
+            if project.is_system != 1 and user_has_project_group_access(session, project, groups)
         ]
 
         seen = {project.id for project in owned}
@@ -265,7 +265,7 @@ def get_project_for_user(
     project_id: int,
     user_id: int,
     is_admin: bool,
-    ad_groups: Optional[list],
+    groups: Optional[list],
 ) -> ProjectFetchResult:
     """Fetch a single project with access control evaluation."""
     session = db.get_session()
@@ -287,7 +287,7 @@ def get_project_for_user(
             .first()
             is not None
         )
-        if is_member or user_has_project_group_access(session, project, ad_groups):
+        if is_member or user_has_project_group_access(session, project, groups):
             return ProjectFetchResult(project=project, status="ok")
         return ProjectFetchResult(project=None, status="forbidden")
     finally:
@@ -808,7 +808,7 @@ def copy_project(
     source_project_id: int,
     actor_user_id: int,
     is_admin: bool,
-    ad_groups: Optional[list],
+    groups: Optional[list],
 ) -> ProjectMutationResponse:
     """Duplicate a project + every product/job/app/scenario under it.
 
@@ -845,7 +845,7 @@ def copy_project(
             )
             .first()
             is not None
-            or user_has_project_group_access(session, source, ad_groups)
+            or user_has_project_group_access(session, source, groups)
             or source.is_system == 1
         )
         if not is_owner_or_member:

@@ -74,7 +74,7 @@ class Config:
     Application configuration loaded from YAML config file.
 
     Provides typed access to all configuration settings with sensible defaults.
-    Settings are organized by category: app, database, jwt, ldap, cors, admin,
+    Settings are organized by category: app, database, jwt, auth, cors, admin,
     server, and logging.
 
     Attributes:
@@ -194,29 +194,10 @@ class Config:
         """Return the JWT expiration time in minutes."""
         return int(_get(self._raw, "jwt.expire_minutes") or 60)
 
-    # --- LDAP ---
     @property
-    def ldap_server(self) -> str:
-        """Return the LDAP server URL."""
-        return os.getenv("RELAYOPS_LDAP_SERVER") or _get(self._raw, "ldap.server") or "ldap://localhost:1389"
-
-    @property
-    def ldap_base_dn(self) -> str:
-        """Return the LDAP base DN."""
-        return _get(self._raw, "ldap.base_dn") or "dc=example,dc=com"
-
-    @property
-    def ldap_use_ssl(self) -> bool:
-        """Return whether LDAP should use SSL."""
-        v = _get(self._raw, "ldap.use_ssl")
-        if v is None:
-            return False
-        return str(v).lower() in ("true", "1", "yes")
-
-    @property
-    def ldap_users_dn(self) -> Optional[str]:
-        """Return the LDAP users DN."""
-        return _get(self._raw, "ldap.users_dn")
+    def auth_demo_accounts(self) -> bool:
+        value = os.getenv("RELAYOPS_DEMO_ACCOUNTS", _get(self._raw, "auth.demo_accounts", False))
+        return str(value).lower() in ("true", "1", "yes")
 
     # --- CORS ---
     @property

@@ -37,6 +37,7 @@ The full Compose deployment should also be exercised: verify `/healthz`, log in,
 
 ## Configuration boundaries
 
+- `RELAYOPS_DEMO_ACCOUNTS` controls demo-account initialization; `RELAYOPS_ADMIN_USERNAME` and `RELAYOPS_ADMIN_PASSWORD` bootstrap an administrator without overwriting existing credentials.
 - `RELAYOPS_DATABASE_URL` and `RELAYOPS_JWT_SECRET` override backend connection/signing settings.
 - `RELAYOPS_LLM_ENDPOINT`, `RELAYOPS_LLM_API_KEY`, `RELAYOPS_LLM_MODEL` explicitly enable model use; there is no implicit provider or adjacent-file credential discovery.
 - SMTP requires explicit `email.backend: smtp` and an SMTP host. The default is `log`.

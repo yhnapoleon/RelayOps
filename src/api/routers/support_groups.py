@@ -24,7 +24,7 @@ from core.services.support_group_service import (
     SEEDED_SUPPORT_GROUPS,
     import_support_groups,
     normalize_group_key,
-    preview_directory_groups,
+    preview_local_groups,
 )
 
 logger = get_logger(__name__)
@@ -145,17 +145,17 @@ def update_support_group(
 
 @router.get("/import-preview", response_model=list[SupportGroupImportPreviewItemResponse])
 def import_preview(
-    source_type: str = Query(..., description="manual/seeded/directory"),
-    query: str = Query("", description="Optional search text for directory preview"),
+    source_type: str = Query(..., description="manual/seeded/local"),
+    query: str = Query("", description="Optional search text for local group preview"),
     current_user: CurrentUser = Depends(BusinessOwnerOrAdmin),
 ):
     _validate_source_type(source_type)
     if source_type == SupportGroupSourceType.SEEDED:
         return [SupportGroupImportPreviewItemResponse(**item) for item in SEEDED_SUPPORT_GROUPS]
-    if source_type == SupportGroupSourceType.DIRECTORY:
+    if source_type == SupportGroupSourceType.LOCAL:
         if len(query.strip()) < 2:
             return []
-        return [SupportGroupImportPreviewItemResponse(**item) for item in preview_directory_groups(query)]
+        return [SupportGroupImportPreviewItemResponse(**item) for item in preview_local_groups(query)]
     return []
 
 
@@ -170,10 +170,10 @@ def import_groups(
     if not preview_items:
         if body.source_type == SupportGroupSourceType.SEEDED:
             preview_items = [SupportGroupImportPreviewItemResponse(**item) for item in SEEDED_SUPPORT_GROUPS]
-        elif body.source_type == SupportGroupSourceType.DIRECTORY and len((body.query or "").strip()) >= 2:
+        elif body.source_type == SupportGroupSourceType.LOCAL and len((body.query or "").strip()) >= 2:
             preview_items = [
                 SupportGroupImportPreviewItemResponse(**item)
-                for item in preview_directory_groups(body.query or "")
+                for item in preview_local_groups(body.query or "")
             ]
 
     imported = import_support_groups(

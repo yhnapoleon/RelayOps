@@ -74,7 +74,7 @@ def _is_elevated(current_user: CurrentUser) -> bool:
 
 
 def _get_owned_and_member_project_ids(
-    session: Session, user_id: int, ad_groups: list[str] | None = None
+    session: Session, user_id: int, groups: list[str] | None = None
 ) -> list[int]:
     owned = [row.id for row in session.query(Project.id).filter(Project.owner_id == user_id).all()]
     member = [
@@ -84,15 +84,15 @@ def _get_owned_and_member_project_ids(
     grouped = [
         project.id
         for project in session.query(Project).all()
-        if user_has_project_group_access(session, project, ad_groups)
+        if user_has_project_group_access(session, project, groups)
     ]
     return list(set(owned + member + grouped))
 
 
 def _get_accessible_product_ids(
-    session: Session, user_id: int, ad_groups: list[str] | None = None
+    session: Session, user_id: int, groups: list[str] | None = None
 ) -> list[int]:
-    project_ids = _get_owned_and_member_project_ids(session, user_id, ad_groups)
+    project_ids = _get_owned_and_member_project_ids(session, user_id, groups)
     if not project_ids:
         return []
     return [
@@ -111,7 +111,7 @@ def _user_can_access_issue(
     # so pre-rename JWTs / DB rows still pass the access check.
     if current_user.role in ("regular_user", "business_owner", "relayops_member"):
         return issue.product_id in _get_accessible_product_ids(
-            session, current_user.user_id, current_user.ad_groups
+            session, current_user.user_id, current_user.groups
         )
     return False
 

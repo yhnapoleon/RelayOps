@@ -37,7 +37,7 @@ Open **http://localhost:8080** and sign in with a local demo account:
 
 These are deliberately public demo credentials. Compose binds published ports to the local computer. Do not expose this stack as a production service.
 
-On startup the app creates its database schema and attempts to populate synthetic walkthrough resources from the local directory. The first image build downloads dependencies and may take several minutes.
+On startup the app creates its database schema, initializes local accounts, and populates synthetic walkthrough resources. The first image build downloads dependencies and may take several minutes.
 
 | Surface | Address |
 |---|---|
@@ -48,6 +48,12 @@ On startup the app creates its database schema and attempts to populate syntheti
 | Demo applications | Ports `9001`, `9002`, `9003` |
 
 Stop services with `docker compose down`. Data remains in the named volume. Start with the [walkthrough](docs/DEMO.md) to trigger a synthetic incident and recovery.
+
+## Accounts and sign-in
+
+Sign-in uses local usernames and passwords with salted PBKDF2-SHA256 hashes and JWT sessions. Administrators can create accounts and set passwords in **Admin Panel → User Management**. Any signed-in user can choose **Change password** in the sidebar. New passwords require at least 12 characters; changing a password or signing out invalidates all existing sessions for that account. Role changes apply on the next request.
+
+For a fresh database without demo accounts, copy `.env.example` to `.env`, set `RELAYOPS_DEMO_ACCOUNTS=false`, and configure `RELAYOPS_ADMIN_USERNAME`, `RELAYOPS_ADMIN_PASSWORD`, and a random `RELAYOPS_JWT_SECRET`. Bootstrap settings never reset existing passwords. Disabling demo initialization does not remove previously created accounts. Existing accounts without a local password need an administrator to use **Set password** before they can sign in.
 
 ## Optional AI configuration
 

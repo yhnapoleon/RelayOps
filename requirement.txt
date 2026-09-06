@@ -19,7 +19,6 @@ psycopg2-binary>=2.9
 
 # Auth
 PyJWT>=2.8
-ldap3>=2.9
 
 # Scheduling (cron parsing — Controller missed-run checks, onboarding validation)
 croniter>=2.0

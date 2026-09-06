@@ -115,7 +115,7 @@ def _accessible_project_ids(session, actor: CurrentUser) -> Optional[List[int]]:
     ]
     grouped = [
         p.id for p in session.query(Project).all()
-        if user_has_project_group_access(session, p, actor.ad_groups)
+        if user_has_project_group_access(session, p, actor.groups)
     ]
     return list(set(owned + member + grouped))
 

@@ -360,7 +360,7 @@ def _require_project_access(
     actor_user_id: int,
     actor_role: str,
     require_owner: bool = True,
-    actor_ad_groups: Optional[list[str]] = None,
+    actor_groups: Optional[list[str]] = None,
 ) -> Project:
     """Resolve project + assert actor permission. Raises domain exceptions on failure."""
     from core.models.entities import ProjectMember
@@ -394,7 +394,7 @@ def _require_project_access(
         .first()
         is not None
     )
-    if is_member or user_has_project_group_access(session, project, actor_ad_groups):
+    if is_member or user_has_project_group_access(session, project, actor_groups):
         return project
     raise ForbiddenError("Not authorized")
 
@@ -417,7 +417,7 @@ def submit_version(
     actor_user_id: int,
     actor_username: str,
     actor_role: str,
-    actor_ad_groups: Optional[list[str]] = None,
+    actor_groups: Optional[list[str]] = None,
     change_summary: Optional[str] = None,
     requested_version_number: Optional[str] = None,
 ) -> ProjectVersion:
@@ -435,7 +435,7 @@ def submit_version(
             actor_user_id=actor_user_id,
             actor_role=actor_role,
             require_owner=True,
-            actor_ad_groups=actor_ad_groups,
+            actor_groups=actor_groups,
         )
         if project.is_system == 1:
             raise SystemLockedError("System-managed project is read-only")
@@ -534,14 +534,14 @@ def initiate_handover(
     actor_user_id: int,
     actor_username: str,
     actor_role: str,
-    actor_ad_groups: Optional[list[str]] = None,
+    actor_groups: Optional[list[str]] = None,
 ) -> Issue:
     submit_version(
         project_id=project_id,
         actor_user_id=actor_user_id,
         actor_username=actor_username,
         actor_role=actor_role,
-        actor_ad_groups=actor_ad_groups,
+        actor_groups=actor_groups,
     )
     db = _get_db()
     session = db.get_session()
@@ -714,7 +714,7 @@ def rollback_version(
     actor_user_id: int,
     actor_username: str,
     actor_role: str,
-    actor_ad_groups: Optional[list[str]] = None,
+    actor_groups: Optional[list[str]] = None,
 ) -> ProjectVersion:
     from core.services.project_version_service import (
         can_mutate_project_scope,
@@ -737,7 +737,7 @@ def rollback_version(
             actor_user_id=actor_user_id,
             actor_role=actor_role,
             require_owner=True,
-            actor_ad_groups=actor_ad_groups,
+            actor_groups=actor_groups,
         )
 
         is_mutable, lock_err = can_mutate_project_scope(session, project)

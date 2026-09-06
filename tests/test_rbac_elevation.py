@@ -3,7 +3,7 @@
 A global ``relayops_member`` is a small, trusted, high-privilege population and
 should reach project assets like ``admin`` (see-all + act-as-owner), EXCEPT
 platform-admin-only powers (T3 / admin panel): issue reassignment,
-handover/version approval, LDAP, global templates, system-locked projects.
+handover/version approval, account management, global templates, system-locked projects.
 
 These tests pin:
   * the pure role helper ``is_elevated_role`` (P13 core);

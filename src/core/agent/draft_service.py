@@ -202,7 +202,7 @@ def list_target_projects(db: Database, *, actor: CurrentUser) -> List[dict]:
         db,
         user_id=actor.user_id,
         is_admin=is_elevated_role(actor.role),
-        ad_groups=actor.ad_groups,
+        groups=actor.groups,
     )
     session = db.get_session()
     try:

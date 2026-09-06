@@ -85,7 +85,7 @@ def _get_accessible_project_ids(session, current_user: CurrentUser) -> list[int]
     group_ids = [
         project.id
         for project in session.query(Project).all()
-        if user_has_project_group_access(session, project, current_user.ad_groups)
+        if user_has_project_group_access(session, project, current_user.groups)
     ]
     return sorted(set(owned_ids + member_ids + group_ids))
 
@@ -155,7 +155,7 @@ def _get_scoped_products(session, current_user: CurrentUser, is_admin: bool) -> 
         group_project_ids = {
             project.id
             for project in session.query(Project).all()
-            if user_has_project_group_access(session, project, current_user.ad_groups)
+            if user_has_project_group_access(session, project, current_user.groups)
         }
         group_product_ids = {
             row.id

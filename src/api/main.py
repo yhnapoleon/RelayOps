@@ -23,7 +23,6 @@ from api.routers import (
     issue_preferences,
     issues,
     jobs,
-    ldap,
     members,
     metrics,
     notifications,
@@ -35,13 +34,12 @@ from api.routers import (
     users,
     verification,
 )
-from api.app_config import ldap_auth
 from api.static.spa import mount_spa
 from core.config import get_config
 from core.exceptions import DomainError
 from core.logging import get_logger, setup_logging
 from core.models.database import get_db
-from core.services.user_service import sync_users_from_ldap
+from core.services.user_service import bootstrap_local_accounts
 
 logger = get_logger(__name__)
 
@@ -53,22 +51,7 @@ async def lifespan(app: FastAPI):
     get_db()
     logger.info("Database initialized")
 
-    # Bootstrap user table from LDAP so first admin login can see all eligible users.
-    try:
-        ldap_users = ldap_auth.list_users()
-        if ldap_users:
-            stats = sync_users_from_ldap(ldap_users)
-            logger.info(
-                "LDAP bootstrap sync complete: total={} created={} updated={} skipped={}",
-                stats["total"],
-                stats["created"],
-                stats["updated"],
-                stats["skipped"],
-            )
-        else:
-            logger.warning("LDAP bootstrap sync skipped: no users returned")
-    except Exception:
-        logger.opt(exception=True).warning("LDAP bootstrap sync failed; continuing startup")
+    bootstrap_local_accounts()
 
     # Seed shared support-group data for local/demo environments.
     try:
@@ -213,7 +196,6 @@ app.include_router(agent.router)
 app.include_router(agent_actions.router)
 app.include_router(chat.router)
 app.include_router(diagnose.router)
-app.include_router(ldap.router)
 app.include_router(projects.router)
 app.include_router(support_groups.router)
 app.include_router(products.router)

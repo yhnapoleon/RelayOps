@@ -69,12 +69,12 @@ def setup_logging(level: Optional[str] = None, format_str: Optional[str] = None)
     # Intercept stdlib logging so third-party libs route through loguru
     logging.basicConfig(handlers=[_InterceptHandler()], level=0, force=True)
 
-    # These libraries emit one INFO line per outbound HTTP call / LDAP op. The
+    # These libraries emit one INFO line per outbound HTTP call. The
     # monitoring tick fans out hundreds of httpx calls per cycle, so at INFO
     # they flood stdout (the very back-pressure enqueue=True guards against —
     # but the cheapest fix is to not emit the noise at all). Pin them to
     # WARNING so only failures surface.
-    for _noisy in ("httpx", "httpcore", "urllib3", "ldap3"):
+    for _noisy in ("httpx", "httpcore", "urllib3"):
         logging.getLogger(_noisy).setLevel(logging.WARNING)
 
     _logging_initialized = True
