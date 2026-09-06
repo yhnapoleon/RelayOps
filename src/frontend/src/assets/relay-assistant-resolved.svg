@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Relay Assistant: resolved">
+  <defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="#16a34a"/><stop offset="1" stop-color="#16a34a"/></linearGradient></defs>
+  <rect x="4" y="4" width="120" height="120" rx="36" fill="url(#g)"/>
+  <path d="M35 44h39a15 15 0 0 1 0 30H54l23 25M35 44v55" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="95" cy="33" r="10" fill="#99f6e4"/>
+</svg>

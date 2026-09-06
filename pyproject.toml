@@ -1,0 +1,77 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+
+requires = [ "setuptools", "wheel" ]
+
+[project]
+name = "relayops"
+version = "0.1.0"
+description = "Operations handover, monitoring, and incident management with optional AI assistance"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+  "fastapi",
+  "gunicorn",
+  "croniter",
+  "httpx",
+  "ldap3",
+  "loguru",
+  "prometheus-client",
+  "psycopg2-binary>=2.9",
+  "pydantic",
+  "PyJWT",
+  "PyYAML",
+  "python-multipart",
+  "requests",
+  "sqlalchemy>=2",
+  # uvicorn 0.31+ made `click` an optional extra, but uvicorn/config.py still
+  # imports it at module load time. Pin click explicitly so backend import works.
+  "click",
+  "uvicorn",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio"]
+agent = [ "langchain-openai>=1.0", "langgraph>=1.0", "pypdf>=4.0", "openpyxl>=3.1" ]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"frontend" = [ "dist/**/*" ]
+
+[tool.setuptools.packages.find]
+where = [ "src" ]
+include = [ "api*", "core*", "sdk*", "frontend*" ]
+
+[tool.black]
+line-length = 128
+
+[tool.isort]
+profile = "black"
+atomic = true
+verbose = false
+
+[tool.autoflake]
+in-place = true
+remove-all-unused-imports = true
+remove-unused-variables = true
+recursive = true
+
+[tool.interrogate]
+verbose = 2
+ignore-init-method = true
+ignore-init-module = true
+ignore-magic = true
+ignore-semiprivate = true
+ignore-private = true
+ignore-module = true
+fail-under = 100
+omit-covered-files = true

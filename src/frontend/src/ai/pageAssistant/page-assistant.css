@@ -1,0 +1,340 @@
+/* Relay Assistant floating page assistant — ball, coach bubble, and chat popover. */
+
+.pa-root {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+}
+.pa-root > * {
+  pointer-events: auto;
+}
+
+/* ── Floating ball ─────────────────────────────────────────────── */
+.pa-fab {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.22);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  overflow: visible;
+}
+.pa-fab:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 10px 26px rgba(13, 148, 136, 0.28);
+}
+.pa-fab img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+.pa-fab-open {
+  transform: scale(0.94);
+}
+.pa-fab-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #fff;
+}
+.pa-fab-dot.alert {
+  background: #ef4444;
+  animation: pa-blink 0.8s ease-in-out infinite;
+}
+
+/* Alert shake — three quick wobbles when a new issue is assigned. */
+.pa-fab-shake {
+  animation: pa-shake 0.42s ease-in-out 3;
+}
+@keyframes pa-shake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  25% { transform: translateX(-5px) rotate(-7deg); }
+  50% { transform: translateX(5px) rotate(7deg); }
+  75% { transform: translateX(-3px) rotate(-4deg); }
+}
+
+/* ── Coach bubble ─────────────────────────────────────────────── */
+.pa-coach {
+  position: relative;
+  max-width: 300px;
+  background: #fff;
+  border: 1px solid #fde2e2;
+  border-left: 3px solid var(--color-relayops-brand, #0D9488);
+  border-radius: 14px;
+  padding: 12px 30px 12px 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+  font-size: 13px;
+  line-height: 1.45;
+  color: #334155;
+  animation: pa-pop 0.18s ease;
+}
+.pa-coach-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 6px;
+  line-height: 0;
+}
+.pa-coach-close:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* ── Chat popover ─────────────────────────────────────────────── */
+.pa-panel {
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  height: 520px;
+  max-height: calc(100vh - 120px);
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.24);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: pa-pop 0.18s ease;
+}
+.pa-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.pa-panel-agent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.pa-panel-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.pa-panel-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #0f172a;
+}
+.pa-panel-sub {
+  font-size: 11px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 250px;
+}
+.pa-panel-close {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  line-height: 0;
+}
+.pa-panel-close:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.pa-panel-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+.pa-panel-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pa-panel-hint {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.pa-panel-hint svg {
+  color: var(--color-relayops-brand, #0D9488);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.pa-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pa-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: #334155;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+.pa-chip:hover {
+  border-color: var(--color-relayops-brand, #0D9488);
+  background: #fff5f5;
+}
+.pa-chip svg {
+  color: var(--color-relayops-brand, #0D9488);
+  flex-shrink: 0;
+}
+
+.pa-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pa-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pa-msg.user {
+  align-items: flex-end;
+}
+.pa-bubble {
+  max-width: 90%;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+.pa-msg.user .pa-bubble {
+  background: var(--color-relayops-brand, #0D9488);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.pa-msg.assistant .pa-bubble {
+  background: #f8fafc;
+  border: 1px solid #eef2f7;
+  color: #1e293b;
+  border-bottom-left-radius: 4px;
+}
+.pa-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+.pa-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.pa-input-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid #f1f5f9;
+}
+.pa-textarea {
+  flex: 1;
+  resize: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  max-height: 96px;
+  outline: none;
+}
+.pa-textarea:focus {
+  border-color: var(--color-relayops-brand, #0D9488);
+}
+.pa-send {
+  border: none;
+  background: var(--color-relayops-brand, #0D9488);
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pa-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pa-foot {
+  font-size: 10.5px;
+  color: #94a3b8;
+  text-align: center;
+  padding: 0 12px 10px;
+}
+
+.pa-pulse {
+  animation: pa-blink 1.1s ease-in-out infinite;
+}
+@keyframes pa-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes pa-pop {
+  from { opacity: 0; transform: translateY(6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Markdown answers inside the compact bubble. */
+.pa-bubble .md-content p { margin: 0 0 6px; }
+.pa-bubble .md-content p:last-child { margin-bottom: 0; }
+.pa-bubble .md-content ul,
+.pa-bubble .md-content ol { margin: 4px 0; padding-left: 18px; }
+.pa-bubble .md-content code {
+  background: #eef2f7;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.pa-bubble .md-content table { font-size: 12px; }

@@ -1,0 +1,57 @@
+# Local-only demo defaults. Copy to config.yaml for personal overrides.
+app:
+  name: RelayOps
+  splash_text: Welcome to RelayOps
+  footnote: Synthetic demo workspace
+  base_url: http://localhost:8080
+database:
+  development:
+    host: localhost
+    port: 5432
+    dbname: relayops
+    user: relayops
+    credential: relayops-local-demo
+ldap:
+  server: ldap://localhost:1389
+  base_dn: dc=example,dc=com
+  use_ssl: false
+platform_owners: [admin]
+server:
+  reload: false
+  workers: 1
+cors:
+  allow_origins: [http://localhost:3000, http://localhost:8080]
+mock_services:
+  url: http://localhost:9000
+cml_platform:
+  base_url: http://localhost:9000
+  api_key: relayops-demo-api-key
+  default_project_name: relayops-demo
+  verify_ssl: true
+  check_interval_seconds: 30
+mmp:
+  base_url: http://localhost:9005
+  bearer_token: relayops-demo-monitor-token
+  web_base_url: http://localhost:9005
+  verify_ssl: true
+  check_interval_seconds: 30
+llm:
+  endpoint: ''
+  model: ''
+  vision_model: ''
+  verify_ssl: true
+confluence:
+  base_url: ''
+  verify_ssl: true
+email:
+  enabled: true
+  backend: log
+  domain: example.com
+  fallback_domain: ''
+  from_address: relayops-demo@example.com
+duty_report:
+  enabled: true
+  email:
+    enabled: false
+logging:
+  level: INFO

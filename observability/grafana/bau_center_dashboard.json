@@ -1,0 +1,309 @@
+{
+  "__inputs": [],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "links": [],
+  "liveNow": false,
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["relayops", "day2-ops", "platform"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Data source",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "definition": "label_values(relayops_open_issues, instance)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Instance",
+        "multi": false,
+        "name": "instance",
+        "options": [],
+        "query": {
+          "qryType": 1,
+          "query": "label_values(relayops_open_issues, instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Ops / Day2 Ops Center — Platform & Monitoring",
+  "uid": "relayops-monitoring",
+  "version": 3,
+  "weekStart": "",
+  "panels": [
+    {
+      "type": "row", "id": 100, "title": "Platform Health", "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "id": 1, "type": "stat", "title": "Uptime [7d]",
+      "description": "avg_over_time(up) over 7d — % of scrapes where the app responded",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 0, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 2, "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "yellow", "value": 95 }, { "color": "green", "value": 99 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "avg_over_time(up{job=\"application\", instance=~\"$instance\"}[7d]) * 100", "legendFormat": "uptime", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 2, "type": "stat", "title": "Status",
+      "description": "Current scrape state: UP = app reachable",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 4, "y": 1 },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" },
+        "mappings": [ { "type": "value", "options": { "1": { "text": "UP", "index": 0 }, "0": { "text": "DOWN", "index": 1 } } } ],
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "none", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "up{job=\"application\", instance=~\"$instance\"}", "legendFormat": "up", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 3, "type": "stat", "title": "Process Memory (RSS)",
+      "description": "Resident memory of the app process (Linux/CML only)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 8, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "bytes", "color": { "mode": "fixed", "fixedColor": "blue" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "process_resident_memory_bytes{instance=~\"$instance\"}", "legendFormat": "rss", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 4, "type": "stat", "title": "Process CPU",
+      "description": "CPU cores consumed (rate of process_cpu_seconds_total; Linux/CML only)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 12, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 2, "color": { "mode": "fixed", "fixedColor": "purple" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "rate(process_cpu_seconds_total{instance=~\"$instance\"}[$__rate_interval])", "legendFormat": "cores", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 5, "type": "stat", "title": "Scrape Duration",
+      "description": "How long Prometheus takes to scrape /metrics. Spikes = slow DB during collection.",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "s", "decimals": 3, "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "scrape_duration_seconds{job=\"application\", instance=~\"$instance\"}", "legendFormat": "scrape", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 6, "type": "stat", "title": "Samples / Scrape",
+      "description": "Series returned per scrape. Sudden drop = a collector broke.",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 1 },
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "fixed", "fixedColor": "text" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "none", "graphMode": "area", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "scrape_samples_scraped{job=\"application\", instance=~\"$instance\"}", "legendFormat": "samples", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "Process CPU (cores) over time",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 6 },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "rate(process_cpu_seconds_total{instance=~\"$instance\"}[$__rate_interval])", "legendFormat": "cpu cores", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Process Memory (RSS) over time",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 6 },
+      "fieldConfig": { "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" } },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "process_resident_memory_bytes{instance=~\"$instance\"}", "legendFormat": "rss", "range": true, "refId": "A" } ]
+    },
+
+    {
+      "type": "row", "id": 103, "title": "HTTP Traffic", "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 }
+    },
+    {
+      "id": 30, "type": "stat", "title": "QPS",
+      "description": "Total HTTP requests per second (all endpoints; excludes /metrics)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 14 },
+      "fieldConfig": { "defaults": { "unit": "reqps", "decimals": 2, "color": { "mode": "fixed", "fixedColor": "green" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "sum(rate(relayops_http_requests_total{instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "qps", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 31, "type": "stat", "title": "5xx Error Rate",
+      "description": "Percentage of requests returning 5xx",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 14 },
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 2, "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "none", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "100 * sum(rate(relayops_http_requests_total{instance=~\"$instance\", status=~\"5..\"}[$__rate_interval])) / sum(rate(relayops_http_requests_total{instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "5xx %", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 32, "type": "stat", "title": "Latency p95",
+      "description": "95th percentile request duration across all endpoints",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 4, "x": 8, "y": 14 },
+      "fieldConfig": { "defaults": { "unit": "s", "decimals": 3, "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 0.5 }, { "color": "red", "value": 2 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "histogram_quantile(0.95, sum by (le) (rate(relayops_http_request_duration_seconds_bucket{instance=~\"$instance\"}[$__rate_interval])))", "legendFormat": "p95", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 33, "type": "timeseries", "title": "QPS by Status Class",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 14 },
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 20, "stacking": { "mode": "normal", "group": "A" }, "showPoints": "never" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "sum by (status) (rate(relayops_http_requests_total{instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "{{status}}", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 34, "type": "timeseries", "title": "Request Latency (p50 / p95 / p99)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 20 },
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "histogram_quantile(0.50, sum by (le) (rate(relayops_http_request_duration_seconds_bucket{instance=~\"$instance\"}[$__rate_interval])))", "legendFormat": "p50", "range": true, "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "histogram_quantile(0.95, sum by (le) (rate(relayops_http_request_duration_seconds_bucket{instance=~\"$instance\"}[$__rate_interval])))", "legendFormat": "p95", "range": true, "refId": "B" },
+        { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "histogram_quantile(0.99, sum by (le) (rate(relayops_http_request_duration_seconds_bucket{instance=~\"$instance\"}[$__rate_interval])))", "legendFormat": "p99", "range": true, "refId": "C" }
+      ]
+    },
+    {
+      "id": 35, "type": "timeseries", "title": "Top Endpoints by QPS",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 20 },
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "topk(8, sum by (path) (rate(relayops_http_requests_total{instance=~\"$instance\"}[$__rate_interval])))", "legendFormat": "{{path}}", "range": true, "refId": "A" } ]
+    },
+
+    {
+      "type": "row", "id": 101, "title": "Monitoring Engine (controller self-health)", "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 27 }
+    },
+    {
+      "id": 9, "type": "stat", "title": "Controller Last Tick Age",
+      "description": "Seconds since the monitoring controller last completed a cycle. Red = stalled.",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 28 },
+      "fieldConfig": { "defaults": { "unit": "s", "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 600 }, { "color": "red", "value": 900 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "background", "graphMode": "none", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "time() - relayops_controller_last_tick_timestamp{instance=~\"$instance\"}", "legendFormat": "age", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 10, "type": "stat", "title": "Issues Created (24h)",
+      "description": "Issues raised by the monitoring controller in the last 24h",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 28 },
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "fixed", "fixedColor": "purple" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "increase(relayops_controller_issues_created_total{instance=~\"$instance\"}[24h])", "legendFormat": "created", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 11, "type": "timeseries", "title": "Controller Tick Rate by Result",
+      "description": "success vs error ticks per second",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 28 },
+      "fieldConfig": { "defaults": { "unit": "ops", "custom": { "drawStyle": "line", "fillOpacity": 15, "showPoints": "never" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "error" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "red" } } ] },
+          { "matcher": { "id": "byName", "options": "success" }, "properties": [ { "id": "color", "value": { "mode": "fixed", "fixedColor": "green" } } ] }
+        ] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "sum by (result) (rate(relayops_controller_runs_total{instance=~\"$instance\"}[$__rate_interval]))", "legendFormat": "{{result}}", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 12, "type": "timeseries", "title": "Controller Cycle Duration (p50 / p95)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 34 },
+      "fieldConfig": { "defaults": { "unit": "s", "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "histogram_quantile(0.50, sum by (le) (rate(relayops_controller_cycle_seconds_bucket{instance=~\"$instance\"}[$__rate_interval])))", "legendFormat": "p50", "range": true, "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "histogram_quantile(0.95, sum by (le) (rate(relayops_controller_cycle_seconds_bucket{instance=~\"$instance\"}[$__rate_interval])))", "legendFormat": "p95", "range": true, "refId": "B" }
+      ]
+    },
+
+    {
+      "type": "row", "id": 102, "title": "Ops Data (business)", "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 }
+    },
+    {
+      "id": 13, "type": "stat", "title": "Open Issues",
+      "description": "Issues currently open or in progress",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 42 },
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "thresholds" },
+        "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 10 } ] } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "colorMode": "value", "graphMode": "area", "textMode": "auto" },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "relayops_open_issues{instance=~\"$instance\"}", "legendFormat": "open", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 14, "type": "timeseries", "title": "Issues by Status",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 12, "x": 4, "y": 42 },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineInterpolation": "stepAfter", "fillOpacity": 15, "stacking": { "mode": "normal", "group": "A" }, "showPoints": "never" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "sum by (status) (relayops_issues{instance=~\"$instance\"})", "legendFormat": "{{status}}", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 15, "type": "piechart", "title": "Open Issues by Type",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 42 },
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "pieType": "donut", "legend": { "displayMode": "table", "placement": "right", "values": ["value"] }, "tooltip": { "mode": "single", "sort": "desc" } },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "sum by (type) (relayops_issues{instance=~\"$instance\", status=~\"open|in_progress\"})", "legendFormat": "{{type}}", "range": true, "refId": "A" } ]
+    },
+    {
+      "id": 16, "type": "barchart", "title": "Job Executions (last 24h) by Status",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 48 },
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "palette-classic" }, "custom": { "fillOpacity": 80, "lineWidth": 1 } }, "overrides": [] },
+      "options": { "orientation": "horizontal", "showValue": "auto", "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "single", "sort": "none" }, "xTickLabelRotation": 0 },
+      "targets": [ { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "sum by (status) (relayops_job_executions_24h{instance=~\"$instance\"})", "format": "time_series", "instant": true, "legendFormat": "{{status}}", "range": false, "refId": "A" } ]
+    },
+    {
+      "id": 17, "type": "timeseries", "title": "Inventory (Projects / Products / Jobs)",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 48 },
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineInterpolation": "stepAfter", "fillOpacity": 0, "showPoints": "never" } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "targets": [
+        { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "relayops_projects_total{instance=~\"$instance\"}", "legendFormat": "projects", "range": true, "refId": "A" },
+        { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "relayops_products_total{instance=~\"$instance\"}", "legendFormat": "products", "range": true, "refId": "B" },
+        { "datasource": { "type": "prometheus", "uid": "${datasource}" }, "editorMode": "code", "expr": "relayops_jobs_total{instance=~\"$instance\"}", "legendFormat": "jobs", "range": true, "refId": "C" }
+      ]
+    }
+  ]
+}

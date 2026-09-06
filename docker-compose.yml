@@ -1,0 +1,93 @@
+name: relayops
+
+services:
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: relayops
+      POSTGRES_USER: relayops
+      POSTGRES_PASSWORD: relayops-local-demo
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: ["relayops_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relayops -d relayops"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mock-ldap:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.mock-ldap
+    ports: ["127.0.0.1:1389:1389"]
+
+  mock-cml:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mock-service
+    command: python -m uvicorn mock_services.cml_platform:app --host 0.0.0.0 --port 9000
+    ports: ["127.0.0.1:9000:9000"]
+    depends_on: [mock-app-fastapi, mock-app-runtime, mock-app-ray]
+
+  mock-app-fastapi:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mock-service
+    command: python -m uvicorn mock_services.mock_app_fastapi:app --host 0.0.0.0 --port 9001
+    ports: ["127.0.0.1:9001:9001"]
+
+  mock-app-runtime:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mock-service
+    command: python -m uvicorn mock_services.mock_app_runtime:app --host 0.0.0.0 --port 9002
+    ports: ["127.0.0.1:9002:9002"]
+
+  mock-app-ray:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mock-service
+    command: python -m uvicorn mock_services.mock_app_ray:app --host 0.0.0.0 --port 9003
+    ports: ["127.0.0.1:9003:9003"]
+
+  mock-monitor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mock-service
+    command: python -m uvicorn mock_services.model_monitor:app --host 0.0.0.0 --port 9005
+    ports: ["127.0.0.1:9005:9005"]
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    ports: ["127.0.0.1:8000:8000"]
+    volumes: ["./config.sample.yaml:/app/config.yaml:ro"]
+    environment:
+      RELAYOPS_DATABASE_URL: postgresql://relayops:relayops-local-demo@database:5432/relayops
+      RELAYOPS_LDAP_SERVER: ldap://mock-ldap:1389
+      RELAYOPS_CML_BASE_URL: http://mock-cml:9000
+      RELAYOPS_MMP_BASE_URL: http://mock-monitor:9005
+      RELAYOPS_MOCK_SERVICES_URL: http://mock-cml:9000
+      RELAYOPS_LLM_ENDPOINT: ${RELAYOPS_LLM_ENDPOINT:-}
+      RELAYOPS_LLM_API_KEY: ${RELAYOPS_LLM_API_KEY:-}
+      RELAYOPS_LLM_MODEL: ${RELAYOPS_LLM_MODEL:-}
+      RELAYOPS_JWT_SECRET: ${RELAYOPS_JWT_SECRET:-}
+    depends_on:
+      database:
+        condition: service_healthy
+      mock-ldap:
+        condition: service_started
+      mock-cml:
+        condition: service_started
+      mock-monitor:
+        condition: service_started
+
+  frontend:
+    build: ./src/frontend
+    ports: ["127.0.0.1:8080:80"]
+    volumes: ["./docker/nginx.compose.conf:/etc/nginx/conf.d/default.conf:ro"]
+    depends_on: [backend]
+
+volumes:
+  relayops_data:

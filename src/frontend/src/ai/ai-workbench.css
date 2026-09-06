@@ -1,0 +1,852 @@
+/* AI Workbench — visual language ported from Frontier's app.css/ChatArea.
+   All variables and rules are scoped under .ai-workbench so the Tailwind app
+   around it is untouched. Light theme only (RelayOps has no dark mode). */
+
+@import 'highlight.js/styles/github.css';
+
+.ai-workbench {
+  /* Frontier warm-light palette, Ops accent red kept (same #0D9488) */
+  --bg-primary: oklch(0.985 0.005 40);
+  --bg-card: #ffffff;
+  --bg-elevated: oklch(0.955 0.012 30);
+  --bg-hover: oklch(0.94 0.008 40);
+  --text-primary: oklch(0.18 0.015 40);
+  --text-secondary: oklch(0.38 0.012 40);
+  --text-muted: oklch(0.58 0.01 40);
+  --border-color: oklch(0.91 0.008 40);
+  --primary-accent: #0d9488;
+  --primary-accent-hover: #c41a21;
+  --accent-glow: rgba(13, 148, 136, 0.08);
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --shadow-sm: 0 1px 2px 0 oklch(0.9 0.01 40 / 0.25);
+  --shadow-md: 0 2px 6px oklch(0.85 0.015 40 / 0.25), 0 4px 8px -2px oklch(0.85 0.02 30 / 0.12);
+
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 4rem);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  color: var(--text-primary);
+  position: relative;
+}
+
+/* ── header ── */
+.ai-workbench .aiw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  background: color-mix(in oklab, var(--bg-primary), transparent 10%);
+}
+.ai-workbench .aiw-agent {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.ai-workbench .aiw-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-xl);
+  background: var(--accent-glow);
+  color: var(--primary-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.ai-workbench .aiw-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ai-workbench .aiw-agent-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.ai-workbench .aiw-agent-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.ai-workbench .aiw-header-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.ai-workbench .aiw-header-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+.ai-workbench .aiw-header-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.ai-workbench .aiw-header-btn.active {
+  border-color: var(--primary-accent);
+  color: var(--primary-accent);
+  background: var(--accent-glow);
+}
+.ai-workbench .aiw-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── saved-conversation history overlay ── */
+.ai-workbench .aiw-history {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+}
+.ai-workbench .aiw-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+}
+.ai-workbench .aiw-history-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.ai-workbench .aiw-history-close {
+  display: inline-flex;
+  padding: 0.3rem;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+.ai-workbench .aiw-history-close:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.ai-workbench .aiw-history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+}
+.ai-workbench .aiw-history-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.ai-workbench .aiw-history-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.ai-workbench .aiw-history-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  cursor: pointer;
+  text-align: left;
+}
+.ai-workbench .aiw-history-open:hover:not(:disabled) {
+  border-color: var(--primary-accent);
+  background: var(--bg-hover);
+}
+.ai-workbench .aiw-history-open:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.ai-workbench .aiw-history-row-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-workbench .aiw-history-row-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.ai-workbench .aiw-history-del {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.ai-workbench .aiw-history-del:hover {
+  color: var(--primary-accent);
+  border-color: var(--primary-accent);
+}
+
+/* ── scroll area / greeting ── */
+.ai-workbench .aiw-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+}
+.ai-workbench .aiw-centered {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+}
+.ai-workbench .aiw-greeting {
+  font-weight: 500;
+  font-size: 1.7rem;
+  color: var(--text-primary);
+}
+.ai-workbench .aiw-welcome {
+  color: var(--text-secondary);
+  max-width: 36rem;
+  line-height: 1.6;
+}
+.ai-workbench .aiw-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  max-width: 42rem;
+}
+.ai-workbench .aiw-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ai-workbench .aiw-chip:hover {
+  border-color: var(--primary-accent);
+  color: var(--primary-accent);
+  background: var(--accent-glow);
+}
+
+/* ── messages ── */
+.ai-workbench .aiw-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+.ai-workbench .aiw-msg {
+  display: flex;
+  width: 100%;
+}
+.ai-workbench .aiw-msg.user {
+  justify-content: flex-end;
+}
+.ai-workbench .aiw-msg + .aiw-msg {
+  margin-top: 0.8rem;
+}
+.ai-workbench .aiw-msg-content {
+  display: flex;
+  gap: 0.6rem;
+  max-width: 85%;
+  align-items: flex-start;
+}
+.ai-workbench .aiw-msg.user .aiw-msg-content {
+  flex-direction: row-reverse;
+}
+.ai-workbench .aiw-msg-avatar {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+.ai-workbench .aiw-msg-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ai-workbench .aiw-msg.assistant .aiw-msg-avatar {
+  background: var(--accent-glow);
+  color: var(--primary-accent);
+}
+.ai-workbench .aiw-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.ai-workbench .aiw-msg.user .aiw-stack {
+  align-items: flex-end;
+}
+.ai-workbench .aiw-bubble {
+  padding: 0.9rem 1.25rem;
+  border-radius: var(--radius-2xl);
+  min-width: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+.ai-workbench .aiw-msg.user .aiw-bubble {
+  background: var(--primary-accent);
+  border-color: var(--primary-accent);
+  color: #fff;
+  border-top-right-radius: var(--radius-sm);
+  white-space: pre-wrap;
+}
+.ai-workbench .aiw-msg.assistant .aiw-bubble {
+  border-top-left-radius: var(--radius-sm);
+}
+
+/* ── steps (tool activity) ── */
+.ai-workbench .aiw-steps {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  font-size: 0.8rem;
+  overflow: hidden;
+}
+.ai-workbench .aiw-steps-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.4rem 0.7rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 0.8rem;
+}
+.ai-workbench .aiw-steps-header:hover {
+  background: var(--bg-hover);
+}
+.ai-workbench .aiw-step {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0.9rem;
+  border-top: 1px dashed var(--border-color);
+  color: var(--text-muted);
+}
+.ai-workbench .aiw-step-name {
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ai-workbench .aiw-step-preview {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-workbench .aiw-pulse {
+  animation: aiw-pulse 1.2s ease-in-out infinite;
+}
+@keyframes aiw-pulse {
+  50% { opacity: 0.35; }
+}
+
+/* ── message actions ── */
+.ai-workbench .aiw-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+/* .aiw-action-btn is global: ArtifactCard (and the diagnosis panel that
+   embeds it) renders outside .ai-workbench too. */
+.aiw-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: var(--radius-sm, 6px);
+  color: var(--text-muted, #6b7280);
+  font-size: 0.72rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.aiw-action-btn:hover {
+  background: var(--bg-hover, #f3f4f6);
+  color: var(--text-secondary, #374151);
+}
+
+/* ── error banner ── */
+.ai-workbench .aiw-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 auto;
+  max-width: 56rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+}
+
+/* ── input ── */
+.ai-workbench .aiw-input-wrap {
+  padding: 0.9rem 1.25rem 1.1rem;
+  background: var(--bg-primary);
+}
+.ai-workbench .aiw-modes {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 49rem;
+  margin: 0 auto 0.5rem;
+}
+.ai-workbench .aiw-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.32rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.ai-workbench .aiw-mode:hover:not(:disabled) {
+  border-color: var(--primary-accent);
+  color: var(--primary-accent);
+  background: var(--accent-glow);
+}
+.ai-workbench .aiw-mode.active {
+  border-color: var(--primary-accent);
+  background: var(--primary-accent);
+  color: #fff;
+}
+.ai-workbench .aiw-mode:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ai-workbench .aiw-input-card {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  max-width: 49rem;
+  margin: 0 auto;
+  padding: 0.6rem 0.6rem 0.6rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: border-color 0.15s ease;
+}
+.ai-workbench .aiw-input-card:focus-within {
+  border-color: var(--primary-accent);
+}
+.ai-workbench .aiw-input-card.aiw-input-write {
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 1px var(--primary-accent), var(--shadow-md);
+}
+.ai-workbench .aiw-textarea {
+  flex: 1;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: var(--text-primary);
+  line-height: 1.5;
+  max-height: 10rem;
+}
+.ai-workbench .aiw-send {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--primary-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.ai-workbench .aiw-send:hover {
+  background: var(--primary-accent-hover);
+}
+.ai-workbench .aiw-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ai-workbench .aiw-hint {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+/* ── markdown content (Frontier md-content rules) ── */
+.ai-workbench .md-content {
+  line-height: 1.6;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+.ai-workbench .md-content > :first-child { margin-top: 0; }
+.ai-workbench .md-content > :last-child { margin-bottom: 0; }
+.ai-workbench .md-content p { margin: 0.5rem 0; }
+.ai-workbench .md-content h1,
+.ai-workbench .md-content h2,
+.ai-workbench .md-content h3 {
+  margin: 0.9rem 0 0.4rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.ai-workbench .md-content h1 { font-size: 1.15rem; }
+.ai-workbench .md-content h2 { font-size: 1.05rem; }
+.ai-workbench .md-content h3 { font-size: 0.95rem; }
+.ai-workbench .md-content ul,
+.ai-workbench .md-content ol {
+  margin: 0.5rem 0;
+  padding-left: 1.4rem;
+}
+.ai-workbench .md-content li { margin: 0.2rem 0; }
+.ai-workbench .md-content blockquote {
+  margin: 0.6rem 0;
+  padding: 0.2rem 0.9rem;
+  border-left: 3px solid var(--border-color);
+  color: var(--text-secondary);
+}
+.ai-workbench .md-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82em;
+  background: var(--bg-elevated);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.ai-workbench .md-content pre.hljs {
+  margin: 0.6rem 0;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: #fff;
+  overflow-x: auto;
+}
+.ai-workbench .md-content pre.hljs code {
+  background: none;
+  padding: 0;
+  font-size: 0.78rem;
+}
+.ai-workbench .md-content .table-wrapper {
+  margin: 0.6rem 0;
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+.ai-workbench .md-content table {
+  border-collapse: collapse;
+  /* auto + min-width lets wide tables scroll in .table-wrapper instead of
+     squeezing every column — a 10-column table no longer crushes the Title
+     column to one character per line. */
+  width: auto;
+  min-width: 100%;
+  font-size: 0.82rem;
+}
+.ai-workbench .md-content th,
+.ai-workbench .md-content td {
+  padding: 0.45rem 0.7rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+  vertical-align: top;
+  /* Cap any single cell and break long unbreakable tokens (e.g. the
+     demo‑material‑classifier@… MMP ids, which use non-breaking hyphens) at a
+     readable width rather than char-by-char. */
+  max-width: 24rem;
+  overflow-wrap: anywhere;
+}
+.ai-workbench .md-content thead th {
+  background: var(--bg-elevated);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ai-workbench .md-content tbody tr:last-child td { border-bottom: none; }
+.ai-workbench .md-content a {
+  color: var(--primary-accent);
+  text-decoration: none;
+}
+.ai-workbench .md-content a:hover { text-decoration: underline; }
+.ai-workbench .md-content hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 0.8rem 0;
+}
+
+/* ── markdown table CSV export (button injected by markdown.ts) ── */
+.ai-workbench .md-content .table-wrapper { position: relative; }
+.ai-workbench .md-content .md-table-export {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm, 4px);
+  background: #fff;
+  color: var(--text-secondary, #6b7280);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.ai-workbench .md-content .table-wrapper:hover .md-table-export { opacity: 1; }
+.ai-workbench .md-content .md-table-export:hover { color: var(--primary-accent); }
+
+/* ── chart/table artifacts (SSE `artifact` events) ── */
+.aiw-artifact {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: #fff;
+  padding: 0.6rem 0.75rem 0.75rem;
+  max-width: 720px;
+}
+.aiw-artifact-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.aiw-artifact-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+.aiw-artifact-tools {
+  display: inline-flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+.aiw-artifact-table {
+  margin: 0;
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+.aiw-artifact-table table {
+  border-collapse: collapse;
+  width: auto;
+  min-width: 100%;
+  font-size: 0.8rem;
+}
+.aiw-artifact-table th,
+.aiw-artifact-table td {
+  padding: 0.4rem 0.65rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+  vertical-align: top;
+  max-width: 24rem;
+  overflow-wrap: anywhere;
+}
+.aiw-artifact-table thead th {
+  background: var(--bg-elevated);
+  font-weight: 600;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+
+/* ── nav (quick-jump) artifact ── */
+.aiw-nav-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.aiw-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text-primary, #1f2937);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.aiw-nav-btn:hover:not(:disabled) {
+  border-color: var(--primary-accent, #d33a2f);
+  background: var(--bg-hover, #fafafa);
+}
+.aiw-nav-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.aiw-nav-kind {
+  padding: 0 0.4rem;
+  font-size: 0.66rem;
+  border-radius: 999px;
+  background: var(--bg-elevated, #f3f4f6);
+  color: var(--text-muted, #6b7280);
+}
+
+/* ── Write-confirm card (propose → confirm) ───────────────────────────── */
+.aiw-write-card {
+  border: 1px solid var(--border, #e5e7eb);
+  border-left: 3px solid #d97706;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 6px 0;
+  background: var(--bg-elevated, #fffbeb);
+}
+.aiw-write-confirmed { border-left-color: #16a34a; }
+.aiw-write-cancelled, .aiw-write-error { opacity: 0.85; }
+.aiw-write-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
+.aiw-write-change {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  padding: 3px 0;
+}
+.aiw-write-field { color: var(--text-muted, #6b7280); min-width: 72px; }
+.aiw-write-old { text-decoration: line-through; color: #b91c1c; }
+.aiw-write-arrow { color: var(--text-muted, #6b7280); }
+.aiw-write-new { color: #15803d; font-weight: 600; }
+.aiw-write-rationale {
+  flex-basis: 100%;
+  font-size: 0.76rem;
+  color: var(--text-muted, #6b7280);
+  padding-left: 78px;
+}
+.aiw-write-impact { font-size: 0.78rem; color: var(--text-muted, #6b7280); margin-top: 6px; }
+.aiw-write-warn, .aiw-write-err {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: #b45309;
+  margin-top: 8px;
+}
+.aiw-write-err { color: #b91c1c; }
+.aiw-write-actions { display: flex; gap: 8px; margin-top: 10px; }
+.aiw-write-confirm, .aiw-write-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.aiw-write-confirm { background: #d97706; color: #fff; }
+.aiw-write-confirm:disabled { opacity: 0.6; cursor: default; }
+.aiw-write-cancel { background: transparent; border-color: var(--border, #e5e7eb); }
+.aiw-write-ok { display: flex; align-items: center; gap: 6px; color: #15803d; font-size: 0.82rem; margin-top: 8px; }
+.aiw-write-cancelled { color: var(--text-muted, #6b7280); font-size: 0.82rem; margin-top: 8px; }
+
+/* ── Batch write proposals: per-turn group + one-click confirm-all ─────── */
+.aiw-write-group { display: flex; flex-direction: column; }
+.aiw-write-group-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  border: 1px solid var(--border, #e5e7eb);
+  border-left: 3px solid #d97706;
+  border-radius: 10px;
+  background: var(--bg-elevated, #fffbeb);
+}
+.aiw-write-group-count { font-size: 0.82rem; font-weight: 600; color: var(--text-muted, #6b7280); }
+.aiw-write-confirm-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: #d97706;
+  color: #fff;
+}
+.aiw-write-confirm-all:disabled { opacity: 0.6; cursor: default; }
+
+/* ── Guide step (guide_step event) ────────────────────────────────────── */
+.aiw-guide-card {
+  border: 1px solid var(--border, #e5e7eb);
+  border-left: 3px solid #2563eb;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 6px 0;
+  background: var(--bg-elevated, #eff6ff);
+}
+.aiw-guide-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.aiw-guide-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+}
+.aiw-guide-option:hover { border-color: #2563eb; }
+.aiw-guide-option-label { font-weight: 600; }
+.aiw-guide-option-desc { color: var(--text-muted, #6b7280); font-weight: 400; }
+.aiw-guide-prompt { font-size: 0.84rem; color: var(--text-secondary, #374151); margin-top: 8px; }
+.aiw-guide-deeplink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 5px 12px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  background: #2563eb;
+  color: #fff;
+  border: 1px solid transparent;
+}
+.aiw-guide-deeplink:disabled { opacity: 0.6; cursor: default; }
