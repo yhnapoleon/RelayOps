@@ -242,7 +242,7 @@ def test_resolve_cml_binding_llm_matches_within_pool(monkeypatch):
     # "Inventory Scoring" ↔ "material-classifier" share no characters — difflib
     # can't bridge it; the LLM picks from the fetched candidate pool.
     monkeypatch.setattr(enrich, "fetch_cml_project_names",
-                        lambda extra_queries=(): ["material-classifier", "forecast", "gwb-rm"])
+                        lambda extra_queries=(): ["material-classifier", "forecast", "support-assistant"])
     monkeypatch.setattr(enrich, "_llm_pick_cml",
                         lambda text, name, cands: "material-classifier")
     p = OnboardingDraftPayload(project=ProjectDraft(name="Inventory Scoring"))
@@ -358,7 +358,7 @@ def test_required_error_cleared_after_app_name_backfill(monkeypatch):
         project=ProjectDraft(name="SALES Copilot V2", cml_project_name="support-assistant-v2"),
         products=[ProductDraft(name="SALES Copilot V2", apps=[
             AppDraft(cml_application_name="", cml_subdomain="support-assistant-v2-prod",
-                     application_url="https://support-assistant-v2-prod.ml-x.com/dashboard/#/overview",
+                     application_url="https://support-assistant-v2-prod.apps.example.com/dashboard/#/overview",
                      owner_contact="x@example.com")])],
     )
     apath = "products[0].apps[0].cml_application_name"

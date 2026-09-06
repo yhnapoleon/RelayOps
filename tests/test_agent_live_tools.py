@@ -300,7 +300,7 @@ def test_mmp_get_raw_returns_complete_body(session, admin):
     assert out["data"]["path_echo"] == "/api/projects/189"
 
 
-@pytest.mark.parametrize("bad", ["", "projects", "https://evil.com/x", "/a/../b"])
+@pytest.mark.parametrize("bad", ["", "projects", "https://untrusted.example.com/x", "/a/../b"])
 def test_raw_path_validation_rejects(session, admin, bad):
     assert "error" in live_tools.cml_get_raw(session, admin, path=bad)
     assert "error" in live_tools.mmp_get_raw(session, admin, path=bad)

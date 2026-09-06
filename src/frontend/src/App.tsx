@@ -6519,7 +6519,7 @@ function JobRunbookForm({
               <Input
                 value={mmpUrlInput}
                 onChange={(e) => setMmpUrlInput(e.target.value)}
-                placeholder="https://runtime-mmp-web-prod…/project/160/projectDetails"
+                placeholder="https://monitor.example.com/project/101/projectDetails"
               />
               <Button
                 type="button"
@@ -14657,7 +14657,7 @@ function ProjectSettingsPanel({
                 className="flex-1"
                 value={urlDraft}
                 onChange={(e) => { setUrlDraft(e.target.value); setVerifyResult(null); }}
-                placeholder="https://grafana.internal/d/project-stats"
+                placeholder="https://grafana.example.com/d/project-stats"
               />
               <Button
                 type="button"

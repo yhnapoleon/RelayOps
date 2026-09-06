@@ -554,7 +554,7 @@ class Config:
 
     def mmp_model_web_url(self, project_numeric_id: Optional[int]) -> str:
         """Build the MMP web deep link to a project's models page, e.g.
-        ``https://runtime-mmp-web-prod.../project/189/models``. Returns "" when
+        ``https://monitor.example.com/project/101/models``. Returns "" when
         the web base is unknown or the project id is missing."""
         base = self.mmp_web_base_url
         if not base or project_numeric_id is None:
