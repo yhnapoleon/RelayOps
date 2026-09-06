@@ -1,5 +1,5 @@
 """relayops_job_sla_config / relayops_job_schedule_adherence — deterministic SLA-threshold
-and cron-adherence tools (AGENT_RELIABILITY_PLAN.md §4).
+and cron-adherence tools.
 
 Every number is computed server-side (cron interpreted in SGT); these tests pin
 the math so the chat agent can only relay it, never re-derive it.

@@ -110,9 +110,9 @@ class CmlResourceOption(BaseModel):
 class CmlAppOption(BaseModel):
     """One row in the CML application picker. Carries enough metadata for the
     UI to auto-fill the Application form once a row is picked: ``subdomain``
-    is the alternate binding key (CML/app.md §7) and ``serving_url`` is the
+    is the alternate binding key and ``serving_url`` is the
     deterministic ``https://<subdomain>.<workspace-host>/`` composition
-    (CML/app.md §2) so the user doesn't have to type either by hand."""
+    so the user doesn't have to type either by hand."""
 
     id: str
     name: str

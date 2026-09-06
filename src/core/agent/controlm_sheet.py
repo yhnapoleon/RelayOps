@@ -5,7 +5,7 @@ job names + schedules live in a separate config sheet (a Confluence table or
 an Excel/CSV the EJS team maintains), e.g.:
 
     Job Name                                        | Schedule (free text)              | PARM1 (Project_Name)
-    PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_EDSP    | Run weekly at SGT 2:55pm Monday   | material-classifier
+    PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_DEMO    | Run weekly at SGT 2:55pm Monday   | material-classifier
 
 This module turns that sheet into ``control_m_job_name`` + ``schedule_cron``
 on the draft's jobs:

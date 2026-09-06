@@ -1,4 +1,4 @@
-"""Domain knowledge layer for the Ops agent (plan: AGENT_INTELLIGENCE_PLAN.md §2).
+"""Domain knowledge layer for the Ops agent.
 
 Two deterministic capabilities the LLM must never re-derive on its own:
 
@@ -33,13 +33,13 @@ from core.models.constants import (
 DEFAULT_SLA_RISK_MINUTES = 30
 
 
-# ── capability coverage + known gaps (AGENT_RELIABILITY_PLAN.md §3/§5) ──
+# ── capability coverage + known gaps ──
 #
 # How the agent can serve a user-facing fact/action in chat:
 #   CAP_READ    — a read-only tool answers it directly;
 #   CAP_WRITE   — doable via a write-mode draft (needs the user's confirmation);
 #   CAP_UI_ONLY — no agent capability; the user must do it in the UI.
-# The "怎么 xx" dual-track answer (RELIABILITY_PLAN §6.5) decides "能否在对话完成"
+# The "怎么 xx" dual-track answer decides "能否在对话完成"
 # from THIS table — never from the model's own guess. New user re-ports map here
 # first: a missing/CAP_UI_ONLY row means "I can't", a CAP_READ/WRITE row means
 # "I can". The golden tests assert every named relayops_* tool actually exists.
@@ -64,7 +64,7 @@ CAPABILITY_MATRIX = {
 
 # Every CAP_WRITE capability must map to draft tool(s) that actually exist in the
 # write pool (test-enforced in test_write_cron_sla) — so the dual-track "能力轨"
-# can never promise a tool the pool lacks (RELIABILITY_PLAN §12 D, the cron 空头支票).
+# can never promise a tool the pool lacks.
 WRITE_CAPABILITY_TOOLS = {
     "关单/标记误报": ["draft_resolve_issue_tool", "draft_false_positive_tool"],
     "改 issue 状态 / 记录步骤": ["draft_update_issue_status_tool", "draft_record_step_tool"],

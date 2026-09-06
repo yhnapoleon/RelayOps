@@ -124,10 +124,10 @@ def resolve_application_id(
 def build_serving_url(application_detail: Optional[dict], *, fallback: str = "") -> str:
     """Best-effort construction of the app serving URL.
 
-    The CML doc (§1) gives the pattern
+    Serving URLs can use the pattern
     ``https://<application-subdomain>.<cml-workspace-domain>/<path>`` but
     the workspace domain isn't carried in the application detail payload.
-    Real production: derive ``<workspace>`` from ``cml_platform.base_url``
+    A configured integration can derive ``<workspace>`` from ``cml_platform.base_url``
     by stripping the API path. For the local mock topology the user can
     just pass an explicit ``cml_serving_url`` and we honor it as-is.
 

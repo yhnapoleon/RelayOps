@@ -1,4 +1,4 @@
-"""Pillar D (AGENT_RELIABILITY_PLAN §12 D) — user-specified cron / staleness
+"""Pillar D — user-specified cron / staleness
 threshold write tools, and the capability-matrix binding that kills the
 "切到写入模式却拿不到草案" 空头支票.
 
@@ -103,7 +103,7 @@ def test_write_pool_exposes_cron_and_threshold_tools():
 
 
 def test_capability_matrix_write_caps_have_backing_tool():
-    # RELIABILITY_PLAN §12 D: every CAP_WRITE capability must name draft tools
+    # Capability consistency: every CAP_WRITE capability must name draft tools
     # that actually exist — so the dual-track "能力轨" can never over-promise.
     pytest.importorskip("langchain_core")
     from core.agent import knowledge

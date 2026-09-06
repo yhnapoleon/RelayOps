@@ -1,6 +1,6 @@
 /**
  * Artifact renderer — charts (recharts) and tables streamed by the agent via
- * the `artifact` SSE event (docs/AGENT_CHAT_CONTRACT.md §1c). Rows are
+ * the `artifact` SSE event. Rows are
  * assembled server-side from RBAC-scoped data; this component only renders
  * and exports (table → CSV, chart → PNG).
  */

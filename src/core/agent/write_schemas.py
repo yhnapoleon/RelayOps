@@ -6,7 +6,6 @@ business table. A write tool returns a :class:`WriteProposal` (a *diff* the user
 must confirm) and never mutates a row itself; the deterministic commit happens
 in the confirm endpoint after the user accepts.
 
-See design v2 §5.2.
 """
 from __future__ import annotations
 
@@ -57,7 +56,7 @@ class WriteProposal(BaseModel):
     rbac_reason: str = ""
     # "direct" = a single deterministic service write; "version_flow" = the
     # change enters the project draft/version flow (job cron/SLA), so the UI must
-    # tell the user it is not effective immediately. See design v2 §3.2 (Δ4).
+    # tell the user it is not effective immediately.
     commit_path: Literal["direct", "version_flow"] = "direct"
 
 

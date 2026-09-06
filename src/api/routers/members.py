@@ -292,15 +292,15 @@ def add_member(
     project, state = _project_access_state(session, project_id, current_user)
     _require_access(state)
 
-    # LAN ID is the user's username (lowercase).
-    lan_id = body.username.strip().lower()
-    if not lan_id:
-        raise ValidationError("LAN ID is required")
+    # Normalize the target username before looking up the account.
+    target_username = body.username.strip().lower()
+    if not target_username:
+        raise ValidationError("Username is required")
     # Per-project role only — body validator already restricts to 'relayops_member'.
     # The project's business_owner role is held by Project.owner_id and only
     # changes via the owner-transfer endpoint below, never by /members.
     project_role = body.role
-    target_user = session.query(User).filter(User.username == lan_id).first()
+    target_user = session.query(User).filter(User.username == target_username).first()
 
     # Conflict checks first, before mutating any state, so a rejected
     # request never touches the database.
@@ -321,7 +321,7 @@ def add_member(
         if existing is not None:
             raise ConflictError("User is already a member of this project")
 
-    # Pre-provision a stub user row when the LAN ID hasn't logged in yet,
+    # Pre-provision a stub user row when the username hasn't logged in yet,
     # so the membership can be granted ahead of their first login. Unlike
     # the pre-refactor flow, we no longer overwrite the user's global role
     # from this endpoint — the stub starts as 'regular_user' and LDAP /
@@ -329,7 +329,7 @@ def add_member(
     # ProjectMember row.
     if target_user is None:
         target_user = User(
-            username=lan_id,
+            username=target_username,
             display_name=None,
             # Default global role; will be updated by LDAP sync on first
             # login if applicable. Project membership is independent.
@@ -341,7 +341,7 @@ def add_member(
         session.refresh(target_user)
         logger.info(
             "Pre-provisioned stub user {} for project {} membership by {}",
-            lan_id, project_id, current_user.username,
+            target_username, project_id, current_user.username,
         )
 
     sg_id, sg_name = resolve_support_group_snapshot(session, body.support_group_id)
@@ -668,9 +668,9 @@ def transfer_project_owner(
     session: Session = Depends(get_session),
     current_user: CurrentUser = Depends(BusinessOwnerOrAdmin),
 ):
-    """Transfer a project's Business Owner to another LAN ID.
+    """Transfer a project's Business Owner to another username.
 
-    Pre-provisions a stub user when the target LAN ID hasn't logged in
+    Pre-provisions a stub user when the target username hasn't logged in
     yet (same flow as add_member). Demotes the current owner's
     ProjectMember row to 'relayops_member' and promotes (or creates) the
     target's ProjectMember row to 'business_owner', keeping the invariant
@@ -687,16 +687,16 @@ def transfer_project_owner(
     if current_user.role != "admin" and project.owner_id != current_user.user_id:
         raise ForbiddenError("Only the project owner or a platform admin can transfer ownership")
 
-    lan_id = body.username.strip().lower()
-    if not lan_id:
-        raise ValidationError("LAN ID is required")
+    target_username = body.username.strip().lower()
+    if not target_username:
+        raise ValidationError("Username is required")
 
-    target_user = session.query(User).filter(User.username == lan_id).first()
+    target_user = session.query(User).filter(User.username == target_username).first()
     if target_user is None:
         # Pre-provision a stub so ownership can land before the new owner's
         # first login; LDAP / admin processes still own User.role.
         target_user = User(
-            username=lan_id,
+            username=target_username,
             display_name=None,
             role="regular_user",
             role_locked=False,
@@ -706,7 +706,7 @@ def transfer_project_owner(
         session.refresh(target_user)
         logger.info(
             "Pre-provisioned stub user {} for owner transfer of project {} by {}",
-            lan_id, project_id, current_user.username,
+            target_username, project_id, current_user.username,
         )
 
     if project.owner_id == target_user.id:
@@ -768,7 +768,7 @@ def transfer_project_owner(
     )
     logger.info(
         "Transferred ownership of project {} from user {} to user {} ({}) by {}",
-        project_id, old_owner_id, target_user.id, lan_id, current_user.username,
+        project_id, old_owner_id, target_user.id, target_username, current_user.username,
     )
     return enriched
 

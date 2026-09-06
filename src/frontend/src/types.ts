@@ -56,7 +56,7 @@ export interface Product {
   updated_at: string | null;
 }
 
-/** App probe contract (CML/app.md §5). Drives which serving-URL endpoints
+/** App probe contract. Drives which serving-URL endpoints
  *  the backend AppInterface hits and how it interprets the payload. */
 export type CmlAppType = 'fastapi' | 'runtime' | 'ray' | 'generic';
 

@@ -4,7 +4,7 @@
  * Look & interaction patterns ported from Frontier's ChatArea (greeting +
  * sample-question chips, red user bubbles, collapsible tool-step blocks,
  * markdown answers); state/rendering rewritten in React against the frozen
- * SSE contract (docs/AGENT_CHAT_CONTRACT.md). Conversation history sidebar,
+ * SSE contract. Conversation history sidebar,
  * feedback/share/embed were deliberately cut.
  */
 

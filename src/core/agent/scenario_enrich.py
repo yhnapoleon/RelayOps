@@ -249,7 +249,7 @@ class _ControlMRequest:
     """The Control-M rerun-request values a handover doc supplies for a job/app,
     folded into the email body's ``Application`` / ``Group`` / ``Table`` rows
     (plus an appended CHG/TSK Number row). Values are used verbatim — they are
-    real workspace identifiers (``APPL_CML_EDSP`` etc.), not free text."""
+    real workspace identifiers (``APPL_CML_DEMO`` etc.), not free text."""
 
     __slots__ = ("application", "group", "table", "change_number")
 

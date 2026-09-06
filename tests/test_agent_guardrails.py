@@ -1,4 +1,4 @@
-"""Structural guardrails (AGENT_RELIABILITY_PLAN.md §8): shared language head,
+"""Structural guardrails: shared language head,
 output sanitizer, and the per-turn tool dedup / soft cap.
 """
 
@@ -125,7 +125,7 @@ def test_legitimate_fanout_not_broken_by_cap(fake_db, admin):
     assert all(not (isinstance(r, dict) and "safety cap" in r.get("error", "")) for r in out)
 
 
-# ── guide: no room to fabricate tabs (RELIABILITY_PLAN §12 A-2b) ──────
+# ── guide: no room to fabricate tabs ──────
 
 
 def test_strip_markdown_tables_removes_table_keeps_prose():

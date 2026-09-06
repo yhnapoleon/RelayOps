@@ -13,7 +13,7 @@ from core.agent.llm import AgentDependencyError, LlmNotConfiguredError, get_chat
 logger = get_logger(__name__)
 
 # Shared across chat/guide so language-mirroring + output hygiene never drift
-# between branches (RELIABILITY_PLAN §8). One source, both prompts inject it.
+# between branches. One source, both prompts inject it.
 SHARED_LANG_RULE = (
     "语言与简洁：默认英文回答；仅当用户本轮消息里出现中文时才用中文回答"
     "（镜像用户语言，不要中问英答；语言无法判断时一律默认英文）。"
@@ -257,7 +257,7 @@ _LEAKED_NAV_JSON = re.compile(
 
 
 def _sanitize_answer(text: str) -> str:
-    """Last-line output hygiene (RELIABILITY_PLAN §8): drop nav-button JSON that
+    """Last-line output hygiene: drop nav-button JSON that
     leaked into prose. Deliberately minimal — we strip only the unambiguous case
     so the guard can never mangle a legitimate answer."""
     if not text:
@@ -273,7 +273,7 @@ _MD_TABLE_ROW = re.compile(r"^\s*\|.*\|\s*$")
 
 
 def _strip_markdown_tables(text: str) -> str:
-    """Remove markdown table rows from an answer (RELIABILITY_PLAN §12 A-2b). Used
+    """Remove markdown table rows from an answer. Used
     only by the guide branch when it already showed the tab card — a table there
     can only be a model-fabricated page list (the real list is the clickable card),
     so dropping it removes the room to invent tabs without touching prose."""

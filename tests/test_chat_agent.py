@@ -1,7 +1,7 @@
 """Chat assistant — graph skeleton and SSE event contract, no real LLM/DB.
 
 A scripted fake model drives the ReAct graph through a tool call and a final
-answer; the assertions pin the docs/AGENT_CHAT_CONTRACT.md event sequence.
+answer; the assertions pin the SSE event sequence.
 """
 
 import pytest

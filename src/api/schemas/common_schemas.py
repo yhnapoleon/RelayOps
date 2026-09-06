@@ -100,8 +100,8 @@ class ProjectMemberRoleUpdate(BaseModel):
 class ProjectOwnerTransferRequest(BaseModel):
     """Request body for transferring a project's Business Owner.
 
-    The username is the target user's LAN ID. The backend pre-provisions
-    a stub user row when the LAN ID hasn't logged in yet (same flow as
+    The username is the target user's username. The backend pre-provisions
+    a stub user row when the username hasn't logged in yet (same flow as
     ProjectMemberAdd), so the new owner can be set ahead of their first
     login and resolves on the LDAP sync.
     """

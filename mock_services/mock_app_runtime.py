@@ -1,7 +1,7 @@
 """Mock Runtime Application service (port 9002).
 
 Simulates a real Runtime-backed application (feature-store-cluster) exposing
-the two endpoints documented in CML/app.md §5.2::
+two health and configuration endpoints::
 
     GET /health
         {
@@ -42,7 +42,7 @@ class HealthControlRequest(BaseModel):
 
 app = FastAPI(
     title="Mock Runtime App (feature-store-cluster)",
-    description="Speaks the Runtime /health + /runtime/config contracts from CML/app.md §5.2.",
+    description="Provides synthetic Runtime /health and /runtime/config responses.",
 )
 app.add_middleware(
     CORSMiddleware,

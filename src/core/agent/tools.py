@@ -1267,7 +1267,7 @@ def build_langchain_tools(actor: CurrentUser, artifact_sink: Optional[list] = No
     enters the model context (see core/agent/artifacts.py)."""
     from langchain_core.tools import tool
 
-    # Per-turn call guards (RELIABILITY_PLAN §8): exact-repeat dedup returns the
+    # Per-turn call guards: exact-repeat dedup returns the
     # cached result (the 调用克制 prompt rule turned into a mechanism), and a
     # high runaway-backstop cap (_PER_TOOL_CALL_LIMIT). The cap must stay well
     # above legitimate fan-out — over-query discipline is the prompt's job.

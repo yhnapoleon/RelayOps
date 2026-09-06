@@ -1,4 +1,4 @@
-"""Guide turn — identity-aware "teach me how to use it" branch (design v2 §4.5).
+"""Guide turn — identity-aware "teach me how to use it" branch.
 
 A ReAct agent mounted with the read-only ``ui_capability`` tools plus two
 guide-flow affordances:
@@ -305,7 +305,7 @@ def run_turn(
 
         answer = _sanitize_answer(answer)
         # If the tab list was already shown as a card, any markdown table in the
-        # answer is a fabricated page list — strip it (RELIABILITY_PLAN §12 A-2b).
+        # answer is a fabricated page list — strip it.
         if called & {"guide_offer_tabs", "ui_list_tabs"}:
             answer = _strip_markdown_tables(answer)
         yield {"event": "answer", "data": {"text": answer}}

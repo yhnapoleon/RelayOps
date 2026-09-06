@@ -1,11 +1,8 @@
 """Prompts for the onboarding agent.
 
-The extraction rules are lifted from the team's hand-curated onboarding
-conventions (originally drafted in RELAYOPS_onboarding_todo.md and battle-tested
-during the first manual onboarding batch), then hardened against the real
-Confluence handover exports (six-project sample in handover_docs_raw.md):
-page chrome ahead of the content, tables collapsed into stacked lines, the
-project's true identifiers hiding inside URLs. Keep edits reviewable here —
+The extraction rules handle noisy handover documents: page chrome ahead
+of the content, tables collapsed into stacked lines, and project identifiers
+embedded in URLs. Keep edits reviewable here —
 this string is part of the product's behavior.
 
 All free text the model writes (warnings, descriptions, etc.) must be in
@@ -134,7 +131,7 @@ values, and Chinese/English are mixed. Read by *meaning*, not by layout.
     split line-by-line into action_steps (e.g. "Send control M job to control M
     team for rerun", "Send email to above contact points"); any accompanying
     check queries/links go into verification_steps.
-    "<if EDSP health check alerts, can ignore this field>" is template
+    "<if the health check alerts, this field may be omitted>" is template
     placeholder text, not content.
     ⚠️ Anti-example (do NOT do this): seeing "CML no resource MMP ONLY
     COMPULSORY" and creating a job with cml_job_name="CML Resource Monitoring" —
@@ -169,10 +166,10 @@ values, and Chinese/English are mixed. Read by *meaning*, not by layout.
     "Sent to <approver> for approval" / "Sent to gts-datacentre-… for
     execution") listing the exact identifiers the data-centre team needs. When
     you see this block, fill the JOB it belongs to (not each scenario) with:
-    - control_m_application ← the "Application" value (e.g. `APPL_CML_EDSP`)
-    - control_m_group       ← the "Group" value (e.g. `GRP_01_DEMO_DS_…_EDSP`)
-    - control_m_table       ← the "Table" value (e.g. `TBL_01_DEMO_DS_…_EDSP`)
-    - change_number         ← the "CHG/TSK Number" (e.g. `CHG00000330645`); if
+    - control_m_application ← the "Application" value (e.g. `APPL_CML_DEMO`)
+    - control_m_group       ← the "Group" value (e.g. `GRP_01_DEMO_DS_…_DEMO`)
+    - control_m_table       ← the "Table" value (e.g. `TBL_01_DEMO_DS_…_DEMO`)
+    - change_number         ← the "CHG/TSK Number" (e.g. `CHG00000000001`); if
       the doc lists a standalone "CHG Infinity ticket: CHG…" line for that job's
       Control-M setup, use it. When several CHG numbers map to different tables
       /sub-projects, put each on the job that shares its table.
@@ -194,7 +191,7 @@ values, and Chinese/English are mixed. Read by *meaning*, not by layout.
     Thurs run)". Derive a suggested cron when you can, and note in warnings "the
     cron for xxx was inferred from the document description; verify against the
     actual Control-M schedule".
-20. The same applies to MMP model jobs scheduled via Control-M / EDSP: when the
+20. The same applies to MMP model jobs scheduled via Control-M: when the
     document mentions a run frequency (monthly, weekly, backing out from a
     business deadline), give a suggested cron; leave it blank and add a warning
     when nothing is mentioned.
@@ -265,7 +262,7 @@ into many columns like M T W H F S S W M Q H Y). Extract the **real production
 scheduled jobs** into a jobs array. For each job:
 
 - control_m_job_name: the job name from the "Job Name" column, **copied verbatim**
-  (e.g. PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_EDSP), never rewritten or
+  (e.g. PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_DEMO), never rewritten or
   invented;
 - cml_project_name: the value of the PARM1 (Project_Name) column (e.g.
   material-classifier);
@@ -301,7 +298,7 @@ You are given:
 - the draft jobs to fill: each with an index, its MMP model id, CML job name,
   and description;
 - the Control-M jobs to place: each with its name (often region-coded, e.g.
-  PKG_..._NS_GE_RUN_BW_EDSP) and a description (e.g. "NS GE Batch Scoring Job").
+  PKG_..._NS_GE_RUN_BW_DEMO) and a description (e.g. "NS GE Batch Scoring Job").
 
 For each Control-M job, decide which draft job it is the real schedule for —
 typically by matching the region/variant in its name/description to the draft

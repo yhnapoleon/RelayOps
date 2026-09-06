@@ -38,7 +38,7 @@ class Application(Base):
     cml_project_name = Column(String(255), nullable=True, default="")
     cml_application_name = Column(String(255), nullable=True, default="")
     cml_subdomain = Column(String(255), nullable=True, default="")
-    # Probe routing: fastapi | runtime | ray | generic. Drives which §5 contract
+    # Probe routing: fastapi | runtime | ray | generic. Drives which probe contract
     # the AppInterface enforces against the serving URL.
     cml_app_type = Column(String(20), nullable=True, default="generic")
     # Cached CML ids and serving URL (built from subdomain, may be overridden).

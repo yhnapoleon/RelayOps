@@ -1,4 +1,4 @@
-"""Identity-aware UI knowledge for the guide branch (design v2 §4.5).
+"""Identity-aware UI knowledge for the guide branch.
 
 Two layers, deliberately separated so the narrative copy can never drift past
 what the code actually exposes:
@@ -8,7 +8,7 @@ what the code actually exposes:
   facts from the onboarding create schema + ``validate.py``. These are the
   ground truth the assistant must not contradict.
 * **Narrative layer** (hand-written) — ``TAB_NARRATIVES`` / ``FIELD_NARRATIVES``
-  carry the step-by-step prose (curated from ``docs/USER_GUIDE_INTRO_STEPS.md``).
+  carry the step-by-step prose (loaded from the shipped knowledge base).
 
 Anti-hallucination boundary: when a tab/field has no recorded narrative the
 explain helpers answer "该功能我没有记录" rather than inventing UI behaviour.
@@ -148,7 +148,7 @@ def _schema_has_field(form_key: str, field_path: str) -> bool:
 #
 # Historically hand-written here; now derived from the structured KB so the
 # guide narrative, the page assistant, and the FTS index all read one source
-# (plan §1.5). Shape is unchanged ({title, summary, steps}) so callers and the
+# Shape is unchanged ({title, summary, steps}) so callers and the
 # drift test (TAB_NARRATIVES keys == TAB_VISIBILITY) are unaffected. Derived at
 # import from kb_loader (which does NOT import this module — no import cycle).
 

@@ -1,7 +1,7 @@
 """Mock FastAPI Application service (port 9001).
 
 Simulates a real FastAPI application (inventory-health-api) exposing the
-``/health`` contract documented in CML/app.md §5.1::
+following ``/health`` response::
 
     {
       "status": "healthy",
@@ -34,7 +34,7 @@ class HealthControlRequest(BaseModel):
 
 app = FastAPI(
     title="Mock FastAPI App (inventory-health-api)",
-    description="Speaks the FastAPI /health contract from CML/app.md §5.1.",
+    description="Provides a synthetic FastAPI /health response.",
 )
 app.add_middleware(
     CORSMiddleware,
@@ -56,7 +56,7 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """Return §5.1 health response. Status code 503 when the toggle is off."""
+    """Return the synthetic health response. Status code 503 when the toggle is off."""
     body = {
         "status": "healthy" if app_state["healthy"] else "unhealthy",
         "app_type": "fastapi",

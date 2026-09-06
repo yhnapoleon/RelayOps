@@ -149,8 +149,7 @@ def search_cml_projects(
 
     # /api/v2/projectnames returns name-only rows (no id, no owner). We
     # accept rows with just a name and leave id empty — project_service
-    # resolves name → id at save time via resolve_project_id (CML app.md
-    # §3.2). Owner fields stay None.
+    # resolves name → id at save time via resolve_project_id. Owner fields stay None.
     options: List[CmlProjectOption] = []
     for it in items:
         pid = str(it.get("id") or "")
@@ -498,8 +497,7 @@ def _fetch_cml_items(
 
 def _workspace_host_for_serving_url() -> str:
     """Host part of the CML base URL — used to compose application serving
-    URLs of the form ``https://<subdomain>.<workspace-host>/`` per
-    CML/app.md §2. Returns "" when the base URL is unset or unparseable so
+    URLs of the form ``https://<subdomain>.<workspace-host>/``. Returns "" when the base URL is unset or unparseable so
     the caller can skip serving_url composition without raising."""
     from urllib.parse import urlparse
     from core.config import get_config
@@ -718,7 +716,7 @@ def list_cml_apps_for_project(
 
     Returns ``subdomain`` and a composed ``serving_url`` so the Application
     form can auto-fill those fields once the user picks a row — no manual
-    typing of subdomain or URL required (CML/app.md §2, §3.4).
+    typing of subdomain or URL required.
 
     Pass ``cml_project_name`` to target a different CML project than the
     owning Ops project's binding (per-asset override).

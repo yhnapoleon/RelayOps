@@ -1,5 +1,4 @@
-"""Chat assistant routes — SSE streaming over the contract in
-docs/AGENT_CHAT_CONTRACT.md. Any logged-in user may chat; the tool layer
+"""Chat assistant routes — SSE streaming of assistant events. Any logged-in user may chat; the tool layer
 scopes all data to what that user could see in the UI anyway."""
 
 import json

@@ -1,4 +1,4 @@
-"""Realistic seed + fixtures for agent behavioral eval (AGENT_RELIABILITY_PLAN §12 E).
+"""Realistic seed + fixtures for agent behavioral eval.
 
 Job shapes mirror the failure transcripts so the eval exercises exactly the
 cases that broke:

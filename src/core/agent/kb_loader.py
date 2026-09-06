@@ -1,7 +1,7 @@
 """KB loader — parse the structured guide knowledge base under ``docs/kb/``.
 
 The KB is the single narrative source for the guide branch and the page
-assistant (design: fuzzy-leaping-firefly plan §1.2). One Markdown file per UI
+assistant. One Markdown file per UI
 tab; a lightweight, human-authored, three-source-grounded format:
 
     ---

@@ -839,14 +839,14 @@ from core.agent.doc_signals import (  # noqa: E402
     hints_block,
 )
 
-# Condensed from the real six-project consolidation (handover_docs_raw.md):
+# Synthetic handover export with deliberately noisy formatting:
 # page chrome up front, scheme-less app host, broken tables.
 _MESSY_DOC = """\
 northstar-forecast
  查看内联评论(&V)
  收藏(F) 观看(W) 分享(S)
 页面… Consolidated information of hand-over-ed projects
-创建者： Akshay Sachdeva，上次更新者： Alex Morgan，更新时间：三月 06, 2026  需要 2 分钟阅读时间
+创建者： Demo Author，上次更新者： Alex Morgan，更新时间：三月 06, 2026  需要 2 分钟阅读时间
 Introduction
 This document serves as an official checklist before handing over NORTHSTAR FORECAST project to the Ops Team.
 MetaData
@@ -854,7 +854,7 @@ Project Bitbucket Repo\thttps://bitbucket.example.com/projects/DEMO/repos/norths
 Ray Server App: dynamic-inventory-scoring-prod.ml-demo-workspace.apps.apps.demo.example.com
 Prod stats url: https://prod-stat.ml-demo-workspace.apps.apps.demo.example.com/view/northstar-forecast
 [For MMP] MMP platform link\thttps://runtime-mmp-web-prod.ml-demo-workspace.apps.apps.demo.example.com/project/160/projectDetails
-Grafana: https://grafana-prod.ml-demo-workspace.apps.apps.demo.example.com/d/8-yuqASIk/dash?orgId=1
+Grafana: https://grafana-prod.ml-demo-workspace.apps.apps.demo.example.com/d/demo-dashboard/dash?orgId=1
 App: https://support-assistant-v2-prod.ml-demo-workspace.apps.apps.demo.example.com/dashboard/#/overview
 """
 

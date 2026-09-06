@@ -490,9 +490,8 @@ function splitIssueTitle(issue: { type: string; title: string }): { heading: str
   return { heading: issue.title, endpoint: null };
 }
 
-// Render a user as "Name (lan_id)" so the LAN id is always visible — the LAN
-// id (username) is how Demo staff identify each other, so a bare display name
-// is ambiguous. Falls back to just the LAN id when no display name exists.
+// Render a user as "Name (username)" to distinguish shared display names.
+// Fall back to the username when no display name is available.
 function formatAssignee(
   displayName?: string | null,
   username?: string | null,
@@ -502,9 +501,9 @@ function formatAssignee(
 }
 
 // Human label for any user reference (actor / recipient / created-by): shows
-// "Display Name (lan-id)" so timelines and issue views never surface Ops
+// "Display Name (username)" so timelines and issue views never surface Ops
 // Center's opaque internal row id. Falls back to the numeric id only when
-// neither name nor lan-id is known.
+// neither name nor username is known.
 function userLabel(
   displayName?: string | null,
   username?: string | null,
@@ -805,7 +804,7 @@ type AppFormState = {
   health_check_url: string;
   /** CML v2 binding inputs — sent as cml_project_name + (cml_application_name
    *  or cml_subdomain) + cml_app_type + cml_serving_url. Server resolves the
-   *  ids; the AppInterface uses cml_app_type to pick the §5 health contract. */
+   *  ids; the AppInterface uses cml_app_type to pick the health probe contract. */
   cml_project_name: string;
   cml_application_name: string;
   cml_subdomain: string;
@@ -2316,7 +2315,7 @@ function EmailTemplateBodyForm({
                     <Input
                       value={row.value}
                       onChange={(e) => updateRow(index, { value: e.target.value })}
-                      placeholder="Value, e.g. APPL_CML_EDSP — supports {{tokens}}"
+                      placeholder="Value, e.g. APPL_CML_DEMO — supports {{tokens}}"
                       className="h-7 border-0 shadow-none focus-visible:ring-0 text-xs"
                     />
                   </td>
@@ -2661,7 +2660,7 @@ function ScenarioSectionTemplateControls({
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. EDSP standard Control-M pool"
+                  placeholder="e.g. Demo Control-M pool"
                 />
               </div>
               <div className="space-y-2">
@@ -7207,7 +7206,7 @@ function ApplicationRunbookForm({
   }, [appProjectIdForFetch, appOverrideName]);
 
   // Serving URL is https://<subdomain>.<workspace-host>/… — the first
-  // hostname label is the CML subdomain (CML/app.md §2). Returns '' when the
+  // hostname label is the CML subdomain. Returns '' when the
   // value isn't a parseable URL so the caller can warn the user.
   const subdomainFromUrl = (raw: string): string => {
     const v = (raw || '').trim();
@@ -7258,9 +7257,9 @@ function ApplicationRunbookForm({
 
   // Validate hits the Serving URL exactly as the user typed it. The
   // monitoring loop (core/integrations/app_interface.py) still appends
-  // /health, /ray/full-test, etc. per the CML §5 contract, but the
+  // /health, /ray/full-test, etc. using the configured probe type, but the
   // Validate button is a plain reachability check against <serving-url>/
-  // (CML app.md §2 "Generic app reachability") so users can paste any
+  // (generic app reachability) so users can paste any
   // URL — including one that already contains a path — without the UI
   // mangling it.
   const composedProbeUrl = (form.cml_serving_url || form.application_url || '').trim();
@@ -7279,8 +7278,8 @@ function ApplicationRunbookForm({
                 const next = e.target.value;
                 // datalist pick fires the same change event as free typing,
                 // so match by exact name to detect a pick and auto-fill the
-                // dependent fields (subdomain + Serving URL). Per CML/app.md
-                // §2 the URL is deterministic — we overwrite any prior value
+                // dependent fields (subdomain + Serving URL). The URL is
+                // deterministic — we overwrite any prior value
                 // so the user sees the canonical form; they can still tweak
                 // the path afterwards.
                 const picked = cmlAppOptions.find((opt) => opt.name === next);
@@ -7509,7 +7508,7 @@ function ApplicationRunbookForm({
               </SelectContent>
             </Select>
             <p className="text-[11px] text-slate-500">
-              Drives which CML §5 contract the monitor uses against the Serving URL.
+              Drives which health probe contract the monitor uses against the Serving URL.
             </p>
           </div>
           <div className="space-y-2">
@@ -7532,7 +7531,7 @@ function ApplicationRunbookForm({
               </Button>
             </div>
             <p className="text-[11px] text-slate-500">
-              Alternate lookup key (CML/app.md §7). Optional when Name is set.
+              Alternate lookup key. Optional when Name is set.
               Fetch resolves the app name from the subdomain.
             </p>
             {bindingProbe && (
@@ -16207,14 +16206,14 @@ function MembersDialog({
 
   const currentOwner = members.find((m: api.ProjectMemberData) => m.is_owner);
   const handleTransfer = async () => {
-    const lanId = transferUsername.trim();
-    if (!lanId) return;
+    const targetUsername = transferUsername.trim();
+    if (!targetUsername) return;
     const ownerLabel = currentOwner?.display_name || currentOwner?.username || 'the current owner';
-    const confirmMsg = `Transfer the Business Owner of "${project.name}" from ${ownerLabel} to "${lanId}"?\n\nThis is irreversible from your side once ${lanId} accepts the role.`;
+    const confirmMsg = `Transfer the Business Owner of "${project.name}" from ${ownerLabel} to "${targetUsername}"?\n\nThis is irreversible from your side once ${targetUsername} accepts the role.`;
     if (!window.confirm(confirmMsg)) return;
     setTransferring(true);
     try {
-      await onTransferOwner(project.id, lanId);
+      await onTransferOwner(project.id, targetUsername);
       setTransferUsername('');
       // Close the dialog — the project owner badge / membership badges
       // re-render off the refreshed project list and member roles.
@@ -16244,28 +16243,28 @@ function MembersDialog({
           <DialogTitle>Project Members</DialogTitle>
           <DialogDescription>
             {canManageMembers
-              ? <>Add members by LAN ID for <strong>{project.name}</strong>. If the LAN ID hasn't logged in yet, the access applies automatically on first login.</>
+              ? <>Add members by username for <strong>{project.name}</strong>. If the username hasn't logged in yet, the access applies automatically on first login.</>
               : <>Members of <strong>{project.name}</strong>. You can switch your own role between Ops Member and Product Member; only the Business Owner can add or remove members.</>}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          {/* Add member by LAN ID — owner/admin only. Backend pre-provisions
-              a stub user row when the LAN ID hasn't logged in before, so the
+          {/* Add member by username — owner/admin only. Backend pre-provisions
+              a stub user row when the username hasn't logged in before, so the
               membership is granted immediately and resolves on the user's
               next login. */}
           {canManageMembers && (
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <div className="text-sm font-semibold text-slate-900">Add Member by LAN ID</div>
+            <div className="text-sm font-semibold text-slate-900">Add Member by Username</div>
             <div className="mt-1 text-xs text-slate-500">
-              Enter the user's LAN ID. Works even if they haven't logged in yet — the membership binds to the LAN ID and resolves on their next login. The project's Business Owner is held by the creator and isn't assigned here.
+              Enter the user's username. Works even if they haven't logged in yet — the membership binds to the username and resolves on their next login. The project's Business Owner is held by the creator and isn't assigned here.
             </div>
             <div className="mt-3 space-y-2">
               <div className="flex flex-col gap-2 sm:flex-row">
                 <Input
                   value={newMemberUsername}
                   onChange={e => setNewMemberUsername(e.target.value)}
-                  placeholder="LAN ID, e.g. abc123"
+                  placeholder="Username, e.g. abc123"
                   onKeyDown={e => e.key === 'Enter' && handleAdd()}
                   className="flex-1"
                 />
@@ -16307,16 +16306,16 @@ function MembersDialog({
             <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
               <div className="text-sm font-semibold text-slate-900">Transfer Business Owner</div>
               <div className="mt-1 text-xs text-slate-500">
-                Hand the Business Owner role to another LAN ID. The current owner
+                Hand the Business Owner role to another username. The current owner
                 {currentOwner ? <> (<strong>{currentOwner.display_name || currentOwner.username}</strong>)</> : null}
-                {' '}is demoted to Ops Member. Works for LAN IDs that haven't logged in yet —
+                {' '}is demoted to Ops Member. Works for usernames that haven't logged in yet —
                 the new owner picks it up on their next login.
               </div>
               <div className="mt-3 space-y-2">
                 <Input
                   value={transferUsername}
                   onChange={e => setTransferUsername(e.target.value)}
-                  placeholder="New owner's LAN ID, e.g. xyz456"
+                  placeholder="New owner's username, e.g. xyz456"
                   onKeyDown={e => e.key === 'Enter' && handleTransfer()}
                   disabled={transferring}
                 />
@@ -16347,7 +16346,7 @@ function MembersDialog({
                 </div>
               ) : members.length === 0 ? (
                 <div className="text-center py-6 text-slate-400 text-sm italic">
-                  No members yet. Add one by LAN ID above.
+                  No members yet. Add one by username above.
                 </div>
               ) : (
                 members.map(member => {

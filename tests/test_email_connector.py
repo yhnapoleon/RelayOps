@@ -448,7 +448,7 @@ def test_resolve_user_email_candidates_order(monkeypatch):
     cands = resolve_user_email_candidates(user)
     assert cands == ["sam@external.example.com", f"SamTaylor@{domain}", f"demo001@{fb}"]
     assert resolve_user_email(user) == "sam@external.example.com"
-    # No display name -> primary skipped, the LAN-id fallback becomes first.
+    # No display name -> primary skipped, the username fallback becomes first.
     no_name = SimpleNamespace(username="demo001", display_name="", email=None)
     assert resolve_user_email(no_name) == f"demo001@{fb}"
     # Nothing derivable -> empty / None.

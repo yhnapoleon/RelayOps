@@ -1,7 +1,6 @@
 """Analytics computations — the single home for issue/health statistics.
 
-Extracted verbatim from ``api/routers/analytics.py`` (plan:
-AGENT_INTELLIGENCE_PLAN.md §3.0) so both the REST layer and the agent tool
+Extracted verbatim from ``api/routers/analytics.py`` so both the REST layer and the agent tool
 layer share one implementation. Nothing here touches FastAPI or RBAC: callers
 pass in already-scoped entity lists (the router scopes by role, the agent
 tools by ``_accessible_product_ids``) and get plain dicts back.

@@ -152,7 +152,7 @@ def email_on_duty_about_issue(db: Database, issue: Optional[Issue]) -> tuple[str
     """Email the on-duty Ops assignee about ``issue``.
 
     Tries each resolved address in turn (primary display-name form first, then
-    the LAN-id fallback, then the LDAP address) and stops at the first one the
+    the username fallback, then the LDAP address) and stops at the first one the
     transport accepts. Returns ``(status, sent_address)`` where status is one of
     :data:`EMAIL_SENT` / :data:`EMAIL_FAILED` / :data:`EMAIL_SKIPPED` and
     ``sent_address`` is the address the email actually went to (None unless
@@ -257,7 +257,7 @@ def _annotate_assignee_notification(
 
     ``to_address`` is the address the email actually went to (from the send
     step) so the success line can name the real recipient — including when the
-    LAN-id fallback was used. Runs in its own short-lived session so it never
+    username fallback was used. Runs in its own short-lived session so it never
     piggybacks on (or holds open) the issue-creation transaction. Best-effort:
     logs and swallows.
     """

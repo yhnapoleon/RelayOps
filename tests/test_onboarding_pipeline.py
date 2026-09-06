@@ -206,10 +206,10 @@ def test_email_never_clobbers_authored_template():
 def test_controlm_request_fields_fold_into_the_email_body():
     p = _payload()
     job = p.products[0].jobs[0]
-    job.control_m_application = "APPL_CML_EDSP"
-    job.control_m_group = "GRP_01_DEMO_DS_MONETIZATION_EDSP"
-    job.control_m_table = "TBL_01_DEMO_DS_MONETIZATION_EDSP"
-    job.change_number = "CHG00000344706"
+    job.control_m_application = "APPL_CML_DEMO"
+    job.control_m_group = "GRP_01_DEMO_DS_MONETIZATION_DEMO"
+    job.control_m_table = "TBL_01_DEMO_DS_MONETIZATION_DEMO"
+    job.change_number = "CHG00000000002"
     job.scenarios = [
         JobScenarioDraft(scenario_type="triggered_but_failed", scenario_name="Failed"),
         JobScenarioDraft(scenario_type="dependency_failed", scenario_name="Pipeline"),
@@ -220,11 +220,11 @@ def test_controlm_request_fields_fold_into_the_email_body():
         body = sc.email_template.body.replace("\xa0", " ")
         # The real identifiers replace the blank placeholders on every scenario
         # of the job (the doc gives them once; the fill is job-wide).
-        assert "Application:       APPL_CML_EDSP" in body
-        assert "Group:             GRP_01_DEMO_DS_MONETIZATION_EDSP" in body
-        assert "Table:             TBL_01_DEMO_DS_MONETIZATION_EDSP" in body
+        assert "Application:       APPL_CML_DEMO" in body
+        assert "Group:             GRP_01_DEMO_DS_MONETIZATION_DEMO" in body
+        assert "Table:             TBL_01_DEMO_DS_MONETIZATION_DEMO" in body
         # CHG/TSK Number row is appended with the exact platform label.
-        assert "CHG/TSK Number:    CHG00000344706" in body
+        assert "CHG/TSK Number:    CHG00000000002" in body
         # Job token is left for send-time substitution, not overwritten.
         assert "{{job_name}}" in body
 
@@ -238,7 +238,7 @@ def test_controlm_request_fields_fold_into_the_email_body():
 def test_controlm_request_fields_are_idempotent():
     p = _payload()
     job = p.products[0].jobs[0]
-    job.control_m_application = "APPL_CML_EDSP"
+    job.control_m_application = "APPL_CML_DEMO"
     job.scenarios = [JobScenarioDraft(scenario_type="triggered_but_failed", scenario_name="F")]
     inject_email_actions(p)
     body_after_first = job.scenarios[0].email_template.body
@@ -431,10 +431,10 @@ from core.agent.controlm_sheet import (  # noqa: E402
 def test_controlm_sheet_parse_tsv_and_unsupported():
     text = parse_sheet_to_text(
         "jobs.tsv",
-        b"S/No\tJob Name\tPARM1 (Project_Name)\n1\tPKG_CML_X_RUN_W_EDSP\tmaterial-classifier",
+        b"S/No\tJob Name\tPARM1 (Project_Name)\n1\tPKG_CML_X_RUN_W_DEMO\tmaterial-classifier",
     )
     assert "Job Name | PARM1" in text
-    assert "PKG_CML_X_RUN_W_EDSP | material-classifier" in text
+    assert "PKG_CML_X_RUN_W_DEMO | material-classifier" in text
     with pytest.raises(UnsupportedSheetError):
         parse_sheet_to_text("jobs.pdf", b"%PDF-")
 
@@ -447,10 +447,10 @@ def test_controlm_merge_folds_into_stub_and_creates_new():
             JobDraft(mmp_model_id="NS SG Batch Scoring", description="NS SG Batch Scoring Job")])],
     )
     cm = [
-        ControlMJob(control_m_job_name="PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_EDSP",
+        ControlMJob(control_m_job_name="PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_DEMO",
                     cml_project_name="material-classifier", schedule_cron="55 14 * * 1",
                     description="NS SG Batch Scoring Job"),
-        ControlMJob(control_m_job_name="PKG_CML_MATERIAL_CLASSIFIER_NS_GE_RUN_BW_EDSP",
+        ControlMJob(control_m_job_name="PKG_CML_MATERIAL_CLASSIFIER_NS_GE_RUN_BW_DEMO",
                     cml_project_name="material-classifier", schedule_cron="30 11 * * 2,5",
                     description="NS GE Batch Scoring Job"),
     ]
@@ -469,10 +469,10 @@ def test_controlm_merge_idempotent_backfills_schedule():
     p = OnboardingDraftPayload(
         project=ProjectDraft(name="NS", cml_project_name="material-classifier"),
         products=[ProductDraft(name="NS", jobs=[
-            JobDraft(control_m_job_name="PKG_CML_X_RUN_W_EDSP")])],   # already present, no cron
+            JobDraft(control_m_job_name="PKG_CML_X_RUN_W_DEMO")])],   # already present, no cron
     )
     merge_controlm_into_draft(p, [ControlMJob(
-        control_m_job_name="PKG_CML_X_RUN_W_EDSP", schedule_cron="0 2 * * 1")])
+        control_m_job_name="PKG_CML_X_RUN_W_DEMO", schedule_cron="0 2 * * 1")])
     assert len(p.products[0].jobs) == 1                  # no duplicate
     assert p.products[0].jobs[0].schedule_cron == "0 2 * * 1"
 
@@ -489,10 +489,10 @@ def test_controlm_merge_uses_llm_when_similarity_cannot_link(monkeypatch):
         ])],
     )
     cm = [
-        ControlMJob(control_m_job_name="PKG_CML_MATERIAL_CLASSIFIER_NS_GE_RUN_BW_EDSP",
+        ControlMJob(control_m_job_name="PKG_CML_MATERIAL_CLASSIFIER_NS_GE_RUN_BW_DEMO",
                     cml_project_name="material-classifier", schedule_cron="30 11 * * 2,5",
                     description="NS GE Batch Scoring Job"),
-        ControlMJob(control_m_job_name="PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_EDSP",
+        ControlMJob(control_m_job_name="PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_DEMO",
                     cml_project_name="material-classifier", schedule_cron="55 14 * * 1",
                     description="NS SG Batch Scoring Job"),
     ]
@@ -503,9 +503,9 @@ def test_controlm_merge_uses_llm_when_similarity_cannot_link(monkeypatch):
 
     jobs = p.products[0].jobs
     assert len(jobs) == 2                                # folded, nothing appended
-    assert jobs[1].control_m_job_name == "PKG_CML_MATERIAL_CLASSIFIER_NS_GE_RUN_BW_EDSP"
+    assert jobs[1].control_m_job_name == "PKG_CML_MATERIAL_CLASSIFIER_NS_GE_RUN_BW_DEMO"
     assert jobs[1].schedule_cron == "30 11 * * 2,5"
-    assert jobs[0].control_m_job_name == "PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_EDSP"
+    assert jobs[0].control_m_job_name == "PKG_CML_MATERIAL_CLASSIFIER_NS_SG_RUN_W_DEMO"
     assert jobs[0].schedule_cron == "55 14 * * 1"
 
 

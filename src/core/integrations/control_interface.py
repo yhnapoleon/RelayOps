@@ -1,7 +1,7 @@
 """Control Interface — CML v2 API client.
 
-Encapsulates all GET-only communication with the CML v2 contract documented
-in CML/job.md and CML/app.md. The interface authenticates via
+Encapsulates GET-only communication with a CML-style monitoring API.
+The interface authenticates via
 ``Authorization: Bearer <api_key>``, transparently follows ``next_page_token``
 pagination, and surfaces typed errors via :class:`CmlApiError` so callers
 never need to know about httpx exceptions.
@@ -170,7 +170,7 @@ class ControlInterface:
     ) -> list:
         """Follow CML's ``next_page_token`` until exhausted.
 
-        Treats the token as opaque per CML/job.md §5.2 (no parsing/encoding).
+        Treats the token as opaque (no parsing/encoding).
         """
         params = dict(params or {})
         out: list = []
@@ -228,18 +228,14 @@ class ControlInterface:
     ) -> tuple[list[dict], bool]:
         """First page of accessible project NAMES with a ``has_more`` flag.
 
-        Uses the ``/api/v2/projectnames`` discovery endpoint per CML
-        app.md §3.1 / §10 — the documented entry point for "list projects
-        the current user can see". Earlier this hit ``/api/v2/projects``
-        directly, but that endpoint is documented only for the
-        name-resolution step (§3.2, with ``search_filter`` mandatory) and
-        on some CML workspaces the auth gateway responds with an HTML
-        login page rather than JSON when called without a filter.
+        Uses ``/api/v2/projectnames`` to discover accessible project names.
+        Resolving a selected name to an ID is a separate request to
+        ``/api/v2/projects`` with ``search_filter``.
 
         Returns dicts shaped like ``{"name": <str>, "id": ""}`` so the
         existing :class:`CmlProjectOption` mapping keeps working. ``id``
         is left empty here — name→id resolution happens at save time via
-        :meth:`resolve_project_id` (also documented in §3.2).
+        :meth:`resolve_project_id`.
         """
         params: dict = {"page_size": max(1, min(int(page_size), 50))}
         if name_filter:
@@ -328,8 +324,8 @@ class ControlInterface:
     ) -> list[dict]:
         """List run history for a job.
 
-        ``sort`` defaults to ``-created_at`` (newest first), matching the
-        recommendation in CML/job.md §3.4. When ``limit`` is provided the
+        ``sort`` defaults to ``-created_at`` (newest first).
+        When ``limit`` is provided the
         method does not follow pagination — useful for "I just want the
         latest N runs" polling paths.
         """
@@ -440,7 +436,7 @@ class ControlInterface:
     ) -> str:
         """Resolve a CML application by *name* and/or *subdomain*.
 
-        Per CML/app.md §7, ``application_id`` is the primary key and
+        ``application_id`` is the primary key and
         ``subdomain`` is the secondary binding key. So we try name first
         (with a single-filter call) and, if that misses or is ambiguous,
         fall back to subdomain alone (another single-filter call). We

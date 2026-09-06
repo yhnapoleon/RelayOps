@@ -1,7 +1,7 @@
 """Mock CML Platform service (port 9000).
 
-Speaks the CML v2 monitor-only contract documented in CML/job.md and
-CML/app.md. All v2 endpoints are GET-only and require an
+Provides a local CML-style monitoring API.
+All v2 endpoints are GET-only and require an
 ``Authorization: Bearer <token>`` header (any non-empty token is accepted
 by the mock; the goal is to exercise Ops's auth-injection path, not to
 simulate token validation).
@@ -20,13 +20,13 @@ v2 endpoints (CML contract):
     GET /api/v2/runtimeaddons
     GET /api/v2/workloadstatus, /api/v2/workloadtypes
 
-Mock-only paths (NOT part of the real CML v2 contract, retained because
+Mock control paths (separate from the monitoring API, retained because
 the dashboard needs a way to flip status during local testing):
     GET /control/status                    - dashboard read
     PUT /control/assets/{asset_id}         - flip job/app state
     GET /                                  - dashboard UI
 
-Status enums (matching CML):
+Status enums used by the demo:
     job runs       : ENGINE_{SCHEDULING,STARTING,RUNNING,STOPPING,STOPPED,
                              SUCCEEDED,FAILED,TIMEOUT,SKIPPED,UNKNOWN}
     applications   : APPLICATION_{STARTING,RUNNING,STOPPING,STOPPED,
@@ -93,18 +93,18 @@ DEFAULT_ADDON = "hadoop-cli-7.1.7-1000"
 
 
 def _now_iso() -> str:
-    """ISO-8601 timestamp in UTC with trailing 'Z' (matches CML samples)."""
+    """ISO-8601 timestamp in UTC with trailing 'Z'."""
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def _hex_id() -> str:
-    """`xxxx-xxxx-xxxx-xxxx` style id (matches CML samples like `tx7v-h867-v4db-1ug2`)."""
+    """`xxxx-xxxx-xxxx-xxxx` style id (for example `tx7v-h867-v4db-1ug2`)."""
     h = secrets.token_hex(8)
     return f"{h[0:4]}-{h[4:8]}-{h[8:12]}-{h[12:16]}"
 
 
 def _run_id() -> str:
-    """16-char lowercase alphanumeric run id (matches CML samples)."""
+    """16-char lowercase alphanumeric run id."""
     return secrets.token_hex(8)
 
 
@@ -623,7 +623,7 @@ async def ping():
 async def control_recent_requests(limit: int = Query(default=20, ge=1, le=RECENT_REQUESTS_CAP)):
     """Return the most recent CML requests + responses captured by the mock.
 
-    Mock-only debugging surface; not part of the real CML contract. Useful
+    Mock-only debugging surface, separate from the monitoring API. Useful
     when the user clicks Ops's "Check Now" and wants to see exactly which
     CML calls were issued with what params, and what the mock returned.
     """
@@ -681,7 +681,7 @@ def _parse_filter(search_filter: Optional[str]) -> dict:
 
 
 def _validate_id(value: str, kind: str) -> None:
-    """Loose ID format check — surface 400 for empty/whitespace IDs (CML doc §9)."""
+    """Loose ID format check — surface 400 for empty/whitespace IDs."""
     if not value or value != value.strip() or any(c.isspace() for c in value):
         raise HTTPException(
             status_code=400,
@@ -895,7 +895,7 @@ async def list_applications(
         if sub_filter and sub_filter not in a.subdomain.lower():
             continue
         if status_filter:
-            # CML doc §7 says status filter uses short values like "running"
+            # The status filter accepts short values like "running".
             if not a.status.lower().endswith(status_filter):
                 continue
         items.append(a)
@@ -966,7 +966,7 @@ async def list_workload_types(_token: str = Depends(_require_bearer)):
 
 
 # ===========================================================================
-# Mock-only paths (NOT part of the real CML v2 contract)
+# Mock control paths, separate from the monitoring API
 # ===========================================================================
 
 

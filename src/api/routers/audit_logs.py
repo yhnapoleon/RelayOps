@@ -155,9 +155,9 @@ def _derive_issue_event_label(log: AuditLog) -> str:
 
 
 def _format_user_ref(db: Database, user_id) -> str:
-    """Render a user as ``Display Name (lan-id)`` for human-readable timelines.
+    """Render a user as ``Display Name (username)`` for human-readable timelines.
 
-    The LAN-id (``username``, e.g. ``demo003``) is what people recognise, so we
+    The username (``username``, e.g. ``demo003``) is what people recognise, so we
     surface it alongside the display name instead of the opaque internal row id.
     Falls back to ``user #N`` only when the row can't be resolved.
     """

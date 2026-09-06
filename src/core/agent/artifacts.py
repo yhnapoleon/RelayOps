@@ -1,4 +1,4 @@
-"""Chart/table artifacts for the Ops agent (plan: AGENT_INTELLIGENCE_PLAN.md §7).
+"""Chart/table artifacts for the Ops agent.
 
 Anti-hallucination design: the model never passes data rows. ``render`` takes
 a **dataset name + fetch params**; the dataset registry resolves it through

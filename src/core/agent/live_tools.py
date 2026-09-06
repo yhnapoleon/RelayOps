@@ -5,7 +5,7 @@ go straight to the platforms when the snapshot can't answer — real-time job
 runs with ``failure_reason``, current application status/resources, projects
 that aren't onboarded into Ops yet, the MMP model-governance flags.
 
-Boundary (CML/app.md §11, CML/job.md §9): **GET only**. These tools reuse the
+Boundary: **GET only**. These tools reuse the
 same monitor-only clients as the checkers (``ControlInterface`` /
 ``MmpInterface``); nothing here can create, mutate, trigger or stop anything.
 

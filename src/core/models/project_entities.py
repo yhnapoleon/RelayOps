@@ -37,7 +37,7 @@ class Project(Base):
     is_system = Column(Integer, nullable=False, default=0)  # 0=normal, 1=system-managed(read-only)
     # CML v2 binding lives at the project level: every Job/Application under
     # this Ops Project monitors assets inside the named CML project. Inheriting
-    # from the project mirrors the CML v2 invocation flow (CML/app.md §10.1):
+    # from the project mirrors the CML v2 invocation flow:
     # locate project first, then look up jobs/apps within it.
     cml_project_name = Column(String(255), nullable=True, default="")
     cml_project_id = Column(String(64), nullable=True)

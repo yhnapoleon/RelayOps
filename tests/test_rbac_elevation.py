@@ -1,4 +1,4 @@
-"""Phase R — relayops_member platform elevation (design v2 §3.1.1, Property P13).
+"""Phase R — relayops_member platform elevation.
 
 A global ``relayops_member`` is a small, trusted, high-privilege population and
 should reach project assets like ``admin`` (see-all + act-as-owner), EXCEPT

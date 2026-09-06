@@ -1,6 +1,5 @@
 /**
- * SSE stream client for the AI assistant — implements the frozen contract in
- * docs/AGENT_CHAT_CONTRACT.md (event/data line pairs over a fetch body
+ * SSE stream client for the AI assistant (event/data line pairs over a fetch body
  * reader; this is NOT EventSource because we need POST + Authorization).
  */
 

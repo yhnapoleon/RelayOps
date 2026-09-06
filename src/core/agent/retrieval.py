@@ -75,7 +75,7 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
     # *_display columns carry the original text for output; the indexed
     # columns hold the CJK-bigram-expanded variant used for matching.
     # Label columns (scenario_type / resolution_kind / escalated /
-    # signatures) drive the tiered structured retrieval (plan §6.2 P2).
+    # signatures) drive the tiered structured retrieval.
     conn.execute(
         "CREATE VIRTUAL TABLE issue_fts USING fts5("
         "  issue_id UNINDEXED, issue_type, job_id UNINDEXED, app_id UNINDEXED,"
@@ -137,7 +137,7 @@ def _match_query(text: str) -> str:
 
 
 def _issue_labels(issue) -> dict:
-    """Deterministic retrieval labels (plan §6.2 P2). getattr-tolerant so
+    """Deterministic retrieval labels. getattr-tolerant so
     detached rows / test doubles index fine."""
     from core.agent.knowledge import extract_failure_signatures
 
@@ -359,7 +359,7 @@ def search_kb(query: str, *, tab: str = "", limit: int = 8,
 
 
 # ── tiered similar-issue retrieval for the diagnosis pipeline ────────
-# Plan §6.2 P2: filter first (labels), rank second (BM25 within candidates).
+# Retrieval order: filter first (labels), rank second (BM25 within candidates).
 # Tier ladder: same job → same app → same scenario type → same failure
 # signature → same issue type; each tier widens only while results < limit.
 # Within a tier, real resolutions outrank false-positive dismissals, then

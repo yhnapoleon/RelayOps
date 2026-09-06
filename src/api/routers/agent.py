@@ -1,7 +1,7 @@
 """Onboarding-agent routes: ingest a handover document, review the extracted
 draft, answer the agent's clarification questions, submit to create entities.
 
-Spec: docs/AGENT_ONBOARDING_SPEC.md. Same permission bar as creating a
+Same permission bar as creating a
 project by hand (ProjectEditorOrAdmin); drafts are private to their creator
 (admins see all). LLM is used only in the background extraction step — if the
 gateway isn't configured the ingest endpoint answers 503 up front.

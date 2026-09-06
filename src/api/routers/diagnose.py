@@ -1,6 +1,6 @@
 """Issue diagnosis route — one-click "diagnose" on an Issue, SSE streaming.
 
-Contract: docs/AGENT_CHAT_CONTRACT.md §诊断. Access mirrors issue visibility
+Access mirrors issue visibility
 (product scope / assignee / creator / admin), enforced inside collect_bundle
 before the stream starts so permission failures surface as 403/404, not as
 stream events.

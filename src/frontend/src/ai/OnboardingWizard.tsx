@@ -1,5 +1,5 @@
 /**
- * Onboarding Wizard — handover-document import (AGENT_ONBOARDING_SPEC §2.5, S5).
+ * Onboarding Wizard — handover-document import.
  *
  * Route-style wizard (not chat bubbles): upload/paste → extracting (poll) →
  * preview & edit + answer the agent's clarification questions → submit report.

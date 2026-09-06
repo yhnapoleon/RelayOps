@@ -1,4 +1,4 @@
-"""Deterministic SLA / cron recommendation (design v2 §6, the red line).
+"""Deterministic SLA / cron recommendation.
 
 Scenario: a responder says "this stale alert is a false positive — the job
 running at this cadence is normal". We then suggest adjusting the job's cron /

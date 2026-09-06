@@ -1,6 +1,6 @@
 /**
  * One-click issue diagnosis panel — mounted inside the issue Action
- * Workbench. Drives POST /api/agent/diagnose/{id} (SSE, contract §1b) and
+ * Workbench. Drives POST /api/agent/diagnose/{id} (SSE) and
  * renders the v2 report: stage progress, handling state, ranked root causes,
  * runbook-instantiated steps, escalation + email draft, self-check warnings,
  * the evidence checklist, and embedded table artifacts (shared ArtifactCard

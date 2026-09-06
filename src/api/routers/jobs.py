@@ -412,7 +412,7 @@ async def get_product_cml_status(
 ):
     """Return CML latest-run status for every Ops Job in this product.
 
-    Iterates per-job because the v2 contract (CML/job.md §3.4) reads runs
+    Iterates per-job because the v2 contract reads runs
     one job at a time. Jobs without resolved cml_project_id/cml_job_id are
     skipped with status=None so the UI can show "binding pending".
     """

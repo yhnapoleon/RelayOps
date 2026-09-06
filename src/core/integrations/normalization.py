@@ -27,7 +27,7 @@ CONTROL_M_STATUS_MAP = {
     "waiting": "waiting",
     "queued": "waiting",
     "held": "waiting",
-    # CML v2 ENGINE_* statuses (per CML/job.md §5.1 status mapping).
+    # CML v2 ENGINE_* statuses.
     "engine_succeeded": "completed",
     "engine_failed": "failed",
     "engine_running": "running",
@@ -41,7 +41,7 @@ CONTROL_M_STATUS_MAP = {
 }
 
 
-# CML v2 application status -> Ops lifecycle bucket (CML/app.md §6.1).
+# CML v2 application status -> Ops lifecycle bucket.
 APPLICATION_STATUS_MAP = {
     "application_starting": "starting",
     "application_running": "running",
@@ -66,7 +66,7 @@ class CanonicalAppHealthEvent:
     cml_status: Optional[str] = None      # raw "APPLICATION_RUNNING" etc.
     relayops_health: Optional[str] = None      # healthy / degraded / unhealthy /
                                           # starting / stopping / stopped /
-                                          # failed / unknown — see §6.2.
+                                          # failed / unknown.
 
     def to_preview(self) -> Dict[str, Any]:
         return {
@@ -158,7 +158,7 @@ def _resolve_app_health_profile(payload: Any, profile_hint: Optional[str]) -> st
     if profile_hint:
         return profile_hint
     if isinstance(payload, dict):
-        # CML v2 app contracts (CML/app.md §5) — keyed by app_type.
+        # CML v2 app contracts — keyed by app_type.
         app_type = str(payload.get("app_type") or "").lower()
         if app_type == "fastapi":
             return "cml_fastapi"
@@ -168,7 +168,7 @@ def _resolve_app_health_profile(payload: Any, profile_hint: Optional[str]) -> st
             return "cml_runtime"
         # AppInterface composes a {"health": ..., "config": ...} envelope when
         # probing Runtime (because Runtime needs both /health and /runtime/config to
-        # pass per §5.2). Detect that envelope here.
+        # pass). Detect that envelope here.
         if (
             isinstance(payload.get("health"), dict)
             and str(payload.get("health", {}).get("app_type") or "").lower() == "runtime"
@@ -229,7 +229,7 @@ def _attach_relayops_health(
     cml_status: Optional[str],
     status_code: Optional[int],
 ) -> None:
-    """Populate ``event.cml_status`` and ``event.relayops_health`` per §6.2.
+    """Populate ``event.cml_status`` and ``event.relayops_health``.
 
     Treats a missing/non-2xx ``status_code`` as a transport failure for the
     RUNNING-but-not-passing case, so it maps to ``unhealthy`` rather than
@@ -263,7 +263,7 @@ def normalize_app_health_payload(
     )
 
     if profile == "cml_fastapi":
-        # §5.1: status=healthy AND app_type=fastapi.
+        # FastAPI: status=healthy AND app_type=fastapi.
         is_healthy = (
             isinstance(payload, dict)
             and str(payload.get("status") or "").lower() == "healthy"
@@ -281,7 +281,7 @@ def normalize_app_health_payload(
         return event
 
     if profile == "cml_runtime":
-        # §5.2: caller may pass either a single /health response, or an
+        # Runtime: caller may pass either a single /health response, or an
         # envelope {"health": ..., "config": ...} combining both endpoints.
         health_data: Any
         config_data: Any
@@ -326,7 +326,7 @@ def normalize_app_health_payload(
         return event
 
     if profile == "cml_ray":
-        # §5.3: full_test=passed, ray imported & initialized, alive_nodes>=1,
+        # Ray: full_test=passed, ray imported & initialized, alive_nodes>=1,
         # all five sub-checks (status, task, object_store, parallel_tasks,
         # actor) pass.
         if not isinstance(payload, dict):
@@ -377,7 +377,7 @@ def normalize_app_health_payload(
         return event
 
     if profile == "cml_generic":
-        # §5 generic: any 2xx response with non-empty body is treated as PASS;
+        # Generic: any 2xx response with non-empty body is treated as PASS;
         # caller can override via profile_hint when more is known.
         is_2xx = status_code is None or 200 <= status_code < 300
         event.healthy = bool(is_2xx and payload is not None)

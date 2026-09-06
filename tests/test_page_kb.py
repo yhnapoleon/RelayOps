@@ -1,4 +1,4 @@
-"""KB pipeline drift + retrieval tests (plan §1, fuzzy-leaping-firefly).
+"""KB pipeline drift + retrieval tests.
 
 Guards that the structured KB (docs/kb/*.md) stays honest against the fact
 layer: every documented page is a real tab, every documented button is a real

@@ -1,4 +1,4 @@
-"""Unified assistant dispatcher (v2 §2.2, Δ1).
+"""Unified assistant dispatcher.
 
 A thin layer: classify the turn's intent, then **delegate** to the existing
 capability entry point. There is no nested orchestration graph — qa keeps using
@@ -51,7 +51,7 @@ _GUIDE_PATTERNS = (
     r"\bguide me\b",
     r"walk me through",
     # UI/tab explanation — route to guide, NOT capability-blurb or qa-fabrication
-    # (RELIABILITY_PLAN §12 A; 2nd-round 第9-18轮 disasters). Anchored on a UI
+    # Anchored on a UI
     # noun (tab/页面/page) so data questions ("有几个 job") never match.
     r"(tab|页面|标签页|page).{0,8}(怎么用|功能|作用|是做什么|做什么|干嘛|干什么)",
     r"(介绍|讲解|说明).{0,20}(tab|页面|标签页|page)",
@@ -590,7 +590,7 @@ def _onboarding_turn(actor: CurrentUser, thread_id: Optional[str], draft_ref: Op
 def _snapshot_is_stale(draft, form_snapshot: Optional[dict]) -> bool:
     """True when the client's form snapshot fingerprint disagrees with the
     server-side draft payload — i.e. the client has unsaved edits, so chat must
-    not act on a stale form (design v2 §8 / Req 17.2)."""
+    not act on a stale form."""
     if not form_snapshot:
         return False
     client_hash = form_snapshot.get("hash")

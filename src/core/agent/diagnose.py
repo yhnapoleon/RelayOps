@@ -7,8 +7,7 @@ structured analysis → programmatic self-check (escalation targets and cited
 evidence are verified against the bundle, not just prompted about).
 
 This module keeps what the rest of the platform touches: ``check_access``
-(router pre-flight), ``DiagnosisReport`` (字段即契约 — see
-docs/AGENT_CHAT_CONTRACT.md), ``run_analysis`` (the temperature-0 structured
+(router pre-flight), ``DiagnosisReport`` (structured report fields), ``run_analysis`` (the temperature-0 structured
 call) and ``run_diagnose`` (the SSE event stream).
 
 The draft email is text in the report — nothing here can send mail, close

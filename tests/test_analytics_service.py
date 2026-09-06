@@ -1,6 +1,6 @@
 """analytics_service — period resolution, health classification, issue stats.
 
-The math moved out of the router (AGENT_INTELLIGENCE_PLAN.md §3.0); these
+The math moved out of the router; these
 tests pin the service surface the agent tools build on.
 """
 

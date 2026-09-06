@@ -23,7 +23,7 @@ def _actor():
 
 # NOTE: a typed change request is **never** auto-routed to write (P1 safety —
 # see classify_intent docstring). It stays in qa, where the qa agent nudges the
-# user to flip the Write-mode toggle (and, per RELIABILITY_PLAN §6.5 dual-track,
+# user to flip the Write-mode toggle (and, for a request that needs a UI action,
 # offers to produce a confirm-first draft). So "关闭 issue 88" → qa, not write.
 ROUTING_GOLDEN = [
     ("把 #123 标记为误报", "qa"),
@@ -35,7 +35,7 @@ ROUTING_GOLDEN = [
     ("现在有哪些未关单的 issue?", "qa"),
     ("这个月各类型 issue 占比", "qa"),
     # UI/tab explanation must reach guide (not capability-blurb / qa-fabrication).
-    # RELIABILITY_PLAN §12 A — these are the 2nd-round 第9-18轮 disasters.
+    # Regression cases for page explanations and action routing.
     ("介绍一下My Project这个tab有什么功能", "guide"),
     ("总共有几个tab，作用分别是什么", "guide"),
     ("verification tab 是做什么的", "guide"),

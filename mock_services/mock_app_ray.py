@@ -1,7 +1,7 @@
 """Mock Ray Application service (port 9003).
 
 Simulates a real Ray-backed application (model-serving-ray) exposing the
-``/ray/full-test`` contract documented in CML/app.md §5.3.
+``/ray/full-test`` health probe.
 
 The mock CML Platform's control panel toggles healthy via PUT /control/health.
 When unhealthy: /ray/full-test returns 503 with full_test="failed" and one
@@ -25,7 +25,7 @@ class HealthControlRequest(BaseModel):
 
 app = FastAPI(
     title="Mock Ray App (model-serving-ray)",
-    description="Speaks the Ray /ray/full-test contract from CML/app.md §5.3.",
+    description="Provides a synthetic Ray /ray/full-test response.",
 )
 app.add_middleware(
     CORSMiddleware,

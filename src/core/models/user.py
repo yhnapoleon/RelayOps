@@ -89,7 +89,7 @@ class User(Base):
     username = Column(String(255), unique=True, nullable=False)
     display_name = Column(String(255), nullable=True)
     # Email captured from the LDAP ``mail`` attribute at login. Kept as a
-    # display-name form, then the LAN-id form (see
+    # display-name form, then the username form (see
     # ``resolve_user_email_candidates``). May be NULL.
     email = Column(String(320), nullable=True)
     role = Column(String(50), nullable=False, default=UserRole.REGULAR_USER)

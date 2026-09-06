@@ -73,7 +73,7 @@ def test_handling_state_labels_cover_all_states():
 
 
 def test_capability_matrix_names_only_real_tools():
-    # Drift guard (RELIABILITY_PLAN §3): every relayops_* tool named in the capability
+    # Drift guard: every relayops_* tool named in the capability
     # matrix must actually exist, so the dual-track "能否对话完成" judgement can't
     # promise a tool that isn't wired in.
     import re

@@ -1557,8 +1557,8 @@ export async function addProjectMember(
   username: string,
   role: AssignableRole = 'relayops_member',
 ): Promise<ProjectMemberData> {
-  // Username is the user's LAN ID. The backend pre-provisions a stub
-  // user row when the LAN ID hasn't logged in yet so membership can be
+  // Membership is keyed by username. The backend pre-provisions a stub
+  // user row when the username hasn't logged in yet so membership can be
   // granted ahead of first login. The user's *global* role is no longer
   // touched here — only their project-level role is set.
   return apiFetch<ProjectMemberData>(`/api/projects/${projectId}/members`, {
@@ -1587,9 +1587,9 @@ export async function updateProjectMemberRole(
   });
 }
 
-/** Transfer a project's Business Owner to another user by LAN ID.
+/** Transfer a project's Business Owner to another user by username.
  *
- * The backend pre-provisions a stub user if the LAN ID hasn't logged
+ * The backend pre-provisions a stub user if the username hasn't logged
  * in yet (same flow as addProjectMember), demotes the old owner's
  * per-project role to 'relayops_member', and promotes (or creates) the
  * target's ProjectMember row to 'business_owner'. Caller should refresh

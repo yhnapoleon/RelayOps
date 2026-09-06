@@ -389,7 +389,7 @@ def test_controlm_request_fields_survive_the_merge_into_a_new_asset():
             cml_job_name="ns_batch_my",
             control_m_application="APPL_CML_NS",
             control_m_table="TBL_01_DEMO_DS_NS",
-            change_number="CHG00000330645",
+            change_number="CHG00000000001",
             scenarios=[JobScenarioDraft(scenario_type="triggered_but_failed", scenario_name="F")],
         )],
     )])
@@ -399,12 +399,12 @@ def test_controlm_request_fields_survive_the_merge_into_a_new_asset():
     assert new_job.cml_job_name == "ns_batch_my"
     assert new_job.control_m_application == "APPL_CML_NS"
     assert new_job.control_m_table == "TBL_01_DEMO_DS_NS"
-    assert new_job.change_number == "CHG00000330645"
+    assert new_job.change_number == "CHG00000000001"
 
     inject_email_actions(merged, only_paths={"products[0].jobs[1]"})
     body = new_job.scenarios[0].email_template.body.replace("\xa0", " ")
     assert "APPL_CML_NS" in body and "TBL_01_DEMO_DS_NS" in body
-    assert "CHG00000330645" in body
+    assert "CHG00000000001" in body
     assert new_job.control_m_application == ""  # cleared after composing
 
 

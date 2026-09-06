@@ -98,7 +98,7 @@ def test_explain_tab_tolerates_underscore_key():
 
 
 def test_offered_tab_keys_resolve_hyphen_or_underscore():
-    # Seam guard (RELIABILITY_PLAN §6.3): guide_offer_tabs hands the model these
+    # Seam guard: guide_offer_tabs hands the model these
     # keys; explain_tab must accept each one back in either spelling.
     for role in (UserRole.ADMIN, UserRole.RELAYOPS_MEMBER, UserRole.REGULAR_USER):
         for tab in tabs_for_role(role):
@@ -107,7 +107,7 @@ def test_offered_tab_keys_resolve_hyphen_or_underscore():
 
 
 def test_explain_tab_resolves_display_name():
-    # RELIABILITY_PLAN §12 A — the model passes the human label it saw on the
+    # The model passes the human label it saw on the
     # card (or its own paraphrase), not the internal key. explain_tab must
     # resolve the display name to the right tab.
     assert explain_tab(UserRole.ADMIN, "My Project")["known"] is True

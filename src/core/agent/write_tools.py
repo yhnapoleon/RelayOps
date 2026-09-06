@@ -193,7 +193,7 @@ def draft_job_sla(session, actor: CurrentUser, job_id: int, *, this_alert_age_mi
     ).model_dump()
 
 
-# ── D: user-specified cron / staleness threshold (RELIABILITY_PLAN §12 D) ──
+# ── D: user-specified cron / staleness threshold ──
 #
 # draft_job_sla above only proposes the AUTO-recomputed values; these accept the
 # value the USER asks for ("shift cron 4h later", "tighten staleness to 5h").
@@ -279,7 +279,7 @@ def draft_set_sla_threshold(session, actor: CurrentUser, job_id: int, custom_min
         return {"note": f"自定义阈值已经是 {minutes} 分钟，无需修改。"}
     impact = ("覆盖按 cron×safety_factor 推导的默认 staleness 阈值；超过该分钟数没有新的"
               "成功运行才判 stale。进项目版本流，非即时生效。")
-    # Anti-sycophancy guard (RELIABILITY_PLAN §9): a threshold below the job's own
+    # Anti-sycophancy guard: a threshold below the job's own
     # run interval will fire constantly — surface that instead of silently obeying.
     interval = _natural_interval_for(job)
     if interval and minutes < interval:
