@@ -23,7 +23,7 @@ SQLAlchemy models capture project/product ownership, handover versions, jobs, ap
 
 The assistant has explicit read tools, document extraction, retrieval, and write proposals. Operations that change platform state pass through proposal validation and user confirmation. Deterministic workflows stay available when a model is unconfigured.
 
-The public model monitor uses `GET /api/projects`, `GET /api/projects/{id}`, and normalized per-model `signals`. See `mock_services/model_monitor.py`. Its synthetic protocol is deliberately independent of a private platform. CML-style job/application examples are local mock integrations; they are not a claim of production vendor compatibility.
+The model monitor uses `GET /api/projects`, `GET /api/projects/{id}`, and normalized per-model `signals`. See `mock_services/model_monitor.py`. CML-style job/application examples use local mock integrations.
 
 ## Tradeoffs
 

@@ -45,8 +45,7 @@ class DriftResult:
 class MmpInterface:
     """Client for RelayOps' documented, synthetic model-monitoring protocol.
 
-    This adapter intentionally does not implement an employer's API. The
-    refresh_token argument is retained for call-site compatibility and unused.
+    The refresh_token argument is retained for call-site compatibility and unused.
     """
 
     def __init__(self, base_url: str, bearer_token: str, refresh_token: str = '', *,

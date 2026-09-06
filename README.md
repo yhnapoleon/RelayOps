@@ -8,8 +8,6 @@
 
 RelayOps connects project handover to day-to-day operations: define ownership and recovery procedures, monitor services and scheduled jobs, route incidents to the on-duty team, and retain an audit trail of what happened.
 
-This repository is a sanitized portfolio adaptation of a workplace project independently developed by the author. It uses fictional identities and scenarios, newly prepared public configuration, and synthetic monitoring services. The model-monitoring adapter implements a new demo protocol; private deployment wrappers and original Git history are excluded. It is not affiliated with or endorsed by an employer. See [provenance and scope](docs/PROVENANCE.md).
-
 ## What you can explore
 
 - **Handover and verification:** projects, products, versioned handovers, recovery scenarios, and review workflows.
@@ -70,4 +68,4 @@ npm run lint
 npm run build
 ```
 
-See [development notes](docs/DEVELOPMENT.md) for local services, configuration, and test boundaries. Dependency licenses remain with their respective owners; this repository does not add a blanket license grant over workplace-derived material.
+See [development notes](docs/DEVELOPMENT.md) for local services, configuration, and test boundaries.

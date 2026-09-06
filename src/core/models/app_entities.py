@@ -142,7 +142,7 @@ class ApplicationApiCheck(Base):
     # if populated; expansion to a richer rule DSL stays additive.
     expected_status = Column(Integer, nullable=True)
     expected_body_contains = Column(Text, nullable=True)
-    # Provenance — manual / swagger / imported. Helps later dedupe and
+    # Discovery source — manual / swagger / imported. Helps later dedupe and
     # surfaces "this came from your OpenAPI import" in the UI.
     source = Column(String(20), nullable=False, default="manual")
     source_ref = Column(String(255), nullable=True)
